@@ -2,182 +2,257 @@
 <html lang="es"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema Maestro de Imagenología - Control Operativo</title>
+  <title>Sistema de Imagenología - EsSalud</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg: #f1f5f9;
+      /* PALETA INSTITUCIONAL ESSALUD */
+      --essalud-navy: #002b49;       /* Azul Marino Base */
+      --essalud-blue: #005696;       /* Azul Institucional */
+      --essalud-cyan: #00a0df;       /* Celeste EsSalud */
+      --essalud-cyan-light: #e1f3fb; /* Celeste Fondo Suave */
+      --essalud-teal: #0087a5;       /* Azul Acqua */
+      
+      --bg: #f4f8fb;
       --card-bg: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --primary: #0284c7;
-      --primary-dark: #0369a1;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --purple: #7c3aed;
+      --text: #0a1f33;
+      --muted: #536b82;
+      --border: #d4e3ee;
+      --border-focus: #00a0df;
+      
+      --success: #0d8a4a;
+      --success-bg: #e6f7ee;
+      --danger: #cf222e;
+      --danger-bg: #fde8e8;
+      --purple: #6f42c1;
+      --purple-bg: #f3e8ff;
+      
+      --shadow-sm: 0 2px 6px rgba(0, 43, 73, 0.04);
+      --shadow-md: 0 8px 20px rgba(0, 43, 73, 0.08);
+      --shadow-lg: 0 14px 34px rgba(0, 43, 73, 0.12);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding-bottom: 50px; }
 
+    /* HEADER INSTITUCIONAL ESSALUD */
     header {
-      background: #0f172a; color: #fff; padding: 16px 28px;
-      display: flex; justify-content: space-between; align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: linear-gradient(135deg, #00223d 0%, #003e6d 50%, #005696 100%);
+      color: #fff;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 34, 61, 0.25);
+      border-bottom: 4px solid var(--essalud-cyan);
     }
-    .brand { display: flex; align-items: center; gap: 14px; }
-    .brand-icon {
-      width: 42px; height: 42px; border-radius: 10px; background: #0284c7;
-      display: flex; align-items: center; justify-content: center; font-size: 22px;
+    .brand { display: flex; align-items: center; gap: 16px; }
+    .brand-logo-box {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: #ffffff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: 2px solid var(--essalud-cyan-light);
     }
-    .brand h1 { font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .badge-sub { font-size: 11px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
-    .brand p { font-size: 12px; color: #94a3b8; }
+    .brand h1 {
+      font-size: 20px; font-weight: 800; letter-spacing: -0.3px;
+      display: flex; align-items: center; gap: 10px; color: #ffffff;
+    }
+    .badge-essalud {
+      font-size: 11px; background: var(--essalud-cyan); color: #ffffff;
+      padding: 3px 10px; border-radius: 14px; font-weight: 700;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0,160,223,0.4);
+    }
+    .brand p { font-size: 12.5px; color: #b9d8eb; font-weight: 500; }
     
     .header-btns { display: flex; gap: 10px; align-items: center; }
     .btn {
-      padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
-      cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px;
-      transition: all 0.2s;
+      padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 7px;
+      transition: all 0.2s ease-in-out;
     }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-dark); }
-    .btn-github { background: #24292f; color: #fff; border: 1px solid #444c56; }
-    .btn-github:hover { background: #32383f; }
-    .btn-outline { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
-    .btn-outline:hover { background: #334155; }
-    .btn-print { background: #334155; color: #fff; }
-    .btn-print:hover { background: #1e293b; }
+    .btn-github {
+      background: #ffffff; color: var(--essalud-navy);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-weight: 700;
+    }
+    .btn-github:hover { background: var(--essalud-cyan-light); color: var(--essalud-blue); transform: translateY(-1px); }
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.12); color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(4px);
+    }
+    .btn-outline:hover { background: rgba(255, 255, 255, 0.22); border-color: #ffffff; }
+    .btn-primary {
+      background: var(--essalud-cyan); color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 160, 223, 0.35); font-weight: 700;
+    }
+    .btn-primary:hover { background: #0087bd; transform: translateY(-1px); }
+    .btn-print {
+      background: #ffffff; color: var(--essalud-blue); border: 1.5px solid var(--border);
+      font-weight: 700;
+    }
+    .btn-print:hover { background: var(--essalud-cyan-light); border-color: var(--essalud-cyan); color: var(--essalud-navy); }
 
+    /* PESTAÑAS TIPO CÁPSULA MODERNA */
     .nav-tabs {
-      background: #fff; border-bottom: 1px solid var(--border);
-      padding: 0 28px; display: flex; gap: 8px; overflow-x: auto;
+      background: #ffffff; border-bottom: 1px solid var(--border);
+      padding: 6px 32px; display: flex; gap: 8px; overflow-x: auto;
+      box-shadow: var(--shadow-sm);
     }
     .tab-btn {
-      padding: 14px 18px; font-size: 13px; font-weight: 600; color: var(--muted);
-      border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent;
+      padding: 12px 18px; font-size: 13px; font-weight: 700; color: var(--muted);
+      border: none; background: transparent; cursor: pointer; border-radius: 8px;
       display: flex; align-items: center; gap: 8px; white-space: nowrap;
+      transition: all 0.2s;
     }
-    .tab-btn:hover { color: var(--primary); }
-    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-btn:hover { color: var(--essalud-blue); background: var(--essalud-cyan-light); }
+    .tab-btn.active {
+      color: #ffffff; background: linear-gradient(135deg, var(--essalud-blue) 0%, var(--essalud-cyan) 100%);
+      box-shadow: 0 4px 12px rgba(0, 86, 150, 0.25);
+    }
 
-    .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+    .container { max-width: 1420px; margin: 24px auto; padding: 0 24px; }
 
+    /* BARRA DE FILTROS */
     .filter-bar {
-      background: #fff; border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 20px; margin-bottom: 20px; display: flex;
-      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      background: #ffffff; border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 24px; margin-bottom: 22px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+      box-shadow: var(--shadow-sm);
     }
     .filter-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .filter-label { font-size: 13px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .filter-label { font-size: 13px; font-weight: 700; color: var(--essalud-navy); display: flex; align-items: center; gap: 6px; }
     select {
-      padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
-      font-size: 13px; background: #fff; color: var(--text); font-weight: 600; outline: none;
-      cursor: pointer;
+      padding: 9px 14px; border-radius: 8px; border: 1.5px solid var(--border);
+      font-size: 13px; background: #ffffff; color: var(--essalud-navy); font-weight: 600; outline: none;
+      cursor: pointer; transition: all 0.2s;
     }
-    select:focus { border-color: var(--primary); }
+    select:focus { border-color: var(--essalud-cyan); box-shadow: 0 0 0 3px rgba(0, 160, 223, 0.15); }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    /* TARJETAS KPI REDISEÑADAS */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 24px; }
     .kpi-card {
-      background: #fff; border: 1px solid var(--border); border-radius: 10px;
-      padding: 18px 20px; position: relative; overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      background: #ffffff; border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px 22px; position: relative; overflow: hidden;
+      box-shadow: var(--shadow-sm); transition: transform 0.2s, box-shadow 0.2s;
     }
-    .kpi-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-    .kpi-card.blue::before { background: var(--primary); }
-    .kpi-card.green::before { background: var(--success); }
-    .kpi-card.red::before { background: var(--danger); }
-    .kpi-card.purple::before { background: var(--purple); }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .kpi-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+    .kpi-card.blue::before { background: linear-gradient(to bottom, var(--essalud-cyan), var(--essalud-blue)); }
+    .kpi-card.green::before { background: linear-gradient(to bottom, #22c55e, var(--success)); }
+    .kpi-card.red::before { background: linear-gradient(to bottom, #f87171, var(--danger)); }
+    .kpi-card.purple::before { background: linear-gradient(to bottom, #a855f7, var(--purple)); }
 
-    .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .kpi-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
-    .kpi-icon { font-size: 18px; }
-    .kpi-val { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 6px; }
-    .kpi-foot { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); }
-    .badge-pill { padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11px; }
-    .badge-pill.blue { background: #e0f2fe; color: #0369a1; }
-    .badge-pill.green { background: #dcfce7; color: #15803d; }
-    .badge-pill.red { background: #fee2e2; color: #991b1b; }
-    .badge-pill.purple { background: #f3e8ff; color: #6b21a8; }
+    .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .kpi-title { font-size: 11.5px; font-weight: 800; color: var(--muted); letter-spacing: 0.6px; text-transform: uppercase; }
+    .kpi-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .kpi-card.blue .kpi-icon { background: var(--essalud-cyan-light); }
+    .kpi-card.green .kpi-icon { background: var(--success-bg); }
+    .kpi-card.red .kpi-icon { background: var(--danger-bg); }
+    .kpi-card.purple .kpi-icon { background: var(--purple-bg); }
 
-    .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .kpi-val { font-size: 32px; font-weight: 900; color: var(--essalud-navy); line-height: 1; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .kpi-foot { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--muted); font-weight: 600; }
+    .badge-pill { padding: 4px 10px; border-radius: 14px; font-weight: 800; font-size: 11px; }
+    .badge-pill.blue { background: var(--essalud-cyan-light); color: var(--essalud-blue); }
+    .badge-pill.green { background: var(--success-bg); color: var(--success); }
+    .badge-pill.red { background: var(--danger-bg); color: var(--danger); }
+    .badge-pill.purple { background: var(--purple-bg); color: var(--purple); }
+
+    /* PANELES DE GRÁFICOS */
+    .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
     @media (max-width: 992px) { .chart-grid { grid-template-columns: 1fr; } }
     
     .panel {
-      background: #fff; border: 1px solid var(--border); border-radius: 10px;
-      padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      background: #ffffff; border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; box-shadow: var(--shadow-sm);
     }
-    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .panel-title { font-size: 14px; font-weight: 700; color: var(--text); }
-    .panel-sub { font-size: 12px; color: var(--muted); }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .panel-title { font-size: 15px; font-weight: 800; color: var(--essalud-navy); }
+    .panel-sub { font-size: 12px; color: var(--muted); font-weight: 500; }
 
+    /* LEYENDA DEL GRÁFICO DE BARRAS */
     .chart-legend-bar {
-      display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; padding: 6px 10px;
-      background: #f8fafc; border-radius: 6px; border: 1px solid #edf2f7; font-size: 11.5px;
+      display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; padding: 8px 14px;
+      background: var(--essalud-cyan-light); border-radius: 8px; border: 1px solid #cbe6f5; font-size: 12px;
     }
-    .chart-legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #334155; }
-    .chart-legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .chart-legend-item { display: flex; align-items: center; gap: 7px; font-weight: 700; color: var(--essalud-navy); }
+    .chart-legend-dot { width: 12px; height: 12px; border-radius: 3px; }
 
     .svg-chart-container { width: 100%; height: 240px; position: relative; }
     svg { width: 100%; height: 100%; overflow: visible; }
 
+    /* DONUT CHART */
     .donut-layout { display: flex; align-items: center; justify-content: space-around; height: 260px; flex-wrap: wrap; gap: 12px; }
     .donut-svg-box { position: relative; width: 180px; height: 180px; }
     .donut-center-text {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       text-align: center; pointer-events: none;
     }
-    .donut-center-num { font-size: 20px; font-weight: 800; color: var(--text); }
-    .donut-center-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .donut-center-num { font-size: 22px; font-weight: 900; color: var(--essalud-navy); }
+    .donut-center-lbl { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
 
     .legend-list { display: flex; flex-direction: column; gap: 10px; font-size: 12px; }
     .legend-item { display: flex; align-items: center; gap: 8px; }
     .legend-color { width: 12px; height: 12px; border-radius: 3px; }
 
+    /* TABLAS ESTILO ESSALUD */
     .table-card {
-      background: #fff; border: 1px solid var(--border); border-radius: 10px;
-      overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 24px;
+      background: #ffffff; border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 24px;
     }
     .table-top {
-      padding: 16px 20px; border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center; background: #fafbfc;
+      padding: 16px 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(90deg, #f8fbfd 0%, #edf6fb 100%);
     }
-    .table-top h3 { font-size: 14px; font-weight: 700; }
-    .table-top span { font-size: 12px; color: var(--muted); }
+    .table-top h3 { font-size: 14px; font-weight: 800; color: var(--essalud-navy); }
+    .table-top span { font-size: 12px; color: var(--muted); font-weight: 600; }
 
     .table-wrap { width: 100%; overflow-x: auto; max-height: 560px; }
     table { width: 100%; border-collapse: collapse; font-size: 12.5px; text-align: left; }
     th {
-      background: #f8fafc; color: #475569; font-weight: 700;
-      padding: 11px 14px; border-bottom: 1px solid var(--border); white-space: nowrap;
-      position: sticky; top: 0; z-index: 10;
+      background: var(--essalud-navy); color: #ffffff; font-weight: 700;
+      padding: 12px 16px; border-bottom: 1px solid #001d33; white-space: nowrap;
+      position: sticky; top: 0; z-index: 10; letter-spacing: 0.3px;
     }
-    td { padding: 9px 14px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
-    tr:hover td { background-color: #f8fafc; }
-    .num { text-align: right; font-variant-numeric: tabular-nums; font-family: monospace; font-size: 12px; }
-    .bold-row td { font-weight: 700; background: #f8fafc; color: #1e293b; }
-    .section-head td { background: #f1f5f9; font-weight: 800; font-size: 11.5px; letter-spacing: 0.5px; text-transform: uppercase; padding: 7px 14px; }
-    .grand-total td { font-weight: 800; background: #eff6ff; color: #1e3a8a; border-top: 2px solid #bfdbfe; font-size: 13px; }
-    .sub-item td:first-child { padding-left: 28px; color: #334155; }
+    td { padding: 10px 16px; border-bottom: 1px solid #eaf1f6; white-space: nowrap; }
+    tr:hover td { background-color: var(--essalud-cyan-light); }
+    .num { text-align: right; font-variant-numeric: tabular-nums; font-family: "SF Mono", Consolas, Monaco, monospace; font-size: 12px; }
+    .bold-row td { font-weight: 800; background: #f8fbfd; color: var(--essalud-navy); }
+    .section-head td {
+      background: linear-gradient(90deg, #e3f2fd 0%, #f0f7fc 100%);
+      font-weight: 800; font-size: 11.5px; letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 8px 16px; color: var(--essalud-blue); border-top: 1px solid #cce5f7; border-bottom: 1px solid #cce5f7;
+    }
+    .grand-total td {
+      font-weight: 900; background: #e8f4fc; color: var(--essalud-navy);
+      border-top: 2px solid var(--essalud-cyan); font-size: 13.5px;
+    }
+    .sub-item td:first-child { padding-left: 28px; color: #2c4257; font-weight: 500; }
 
+    /* MODAL DE CARGA */
     #uploadModal {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;
+      background: rgba(0, 34, 61, 0.65); backdrop-filter: blur(4px); z-index: 9999;
+      align-items: center; justify-content: center;
     }
     .modal-box {
-      background: #fff; border-radius: 12px; width: 560px; max-width: 90%;
-      padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      background: #ffffff; border-radius: 16px; width: 560px; max-width: 92%;
+      padding: 26px; box-shadow: var(--shadow-lg); border: 2px solid var(--essalud-cyan-light);
     }
     .dropzone {
-      border: 2px dashed #94a3b8; border-radius: 8px; padding: 24px; text-align: center;
-      margin: 12px 0; cursor: pointer; transition: 0.2s; background: #f8fafc;
+      border: 2px dashed #9bc5df; border-radius: 10px; padding: 24px; text-align: center;
+      margin: 14px 0; cursor: pointer; transition: 0.2s; background: #f8fbfd;
     }
-    .dropzone:hover { border-color: var(--primary); background: #f0f9ff; }
+    .dropzone:hover { border-color: var(--essalud-cyan); background: var(--essalud-cyan-light); }
 
-    /* ESTILOS PARA IMPRESIÓN LIMPIA */
+    /* ESTILOS LIMPIOS PARA IMPRESIÓN */
     @media print {
-      body { background: #fff; padding-bottom: 0; }
+      body { background: #ffffff; padding-bottom: 0; }
       header .header-btns, .filter-bar, .nav-tabs, #uploadModal { display: none !important; }
       .container { max-width: 100%; margin: 0; padding: 0; }
       .kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -190,14 +265,14 @@
 
   <header>
     <div class="brand">
-      <div class="brand-icon">🏥</div>
+      <div class="brand-logo-box">🏥</div>
       <div>
-        <h1>IMAGENOLOGÍA DINÁMICA <span class="badge-sub">Panel Maestro</span></h1>
-        <p>Control de Solicitudes, Citas, Demanda Embalsada y Resultados</p>
+        <h1>SISTEMA DE IMAGENOLOGÍA <span class="badge-essalud">EsSalud</span></h1>
+        <p>Monitor Gerencial de Solicitudes, Citas, Demanda Embalsada y Resultados</p>
       </div>
     </div>
     <div class="header-btns">
-          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; background:#1e293b; color:#38bdf8; padding:6px 12px; border-radius:20px; border:1px solid #334155;">
+          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; background:rgba(255,255,255,0.15); color:#ffffff; padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.3);">
             <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
             <span>Producción GitHub Pages</span>
           </div>
@@ -245,7 +320,7 @@
       <div class="kpi-card blue">
         <div class="kpi-header">
           <span class="kpi-title">TD1. Generadas (Demanda)</span>
-          <span class="kpi-icon">📋</span>
+          <div class="kpi-icon">📋</div>
         </div>
         <div class="kpi-val" id="kpi1">37.595</div>
         <div class="kpi-foot">
@@ -257,7 +332,7 @@
       <div class="kpi-card green">
         <div class="kpi-header">
           <span class="kpi-title">TD2. Con Cita Asignada</span>
-          <span class="kpi-icon">📅</span>
+          <div class="kpi-icon">📅</div>
         </div>
         <div class="kpi-val" id="kpi2">22.514</div>
         <div class="kpi-foot">
@@ -269,7 +344,7 @@
       <div class="kpi-card red">
         <div class="kpi-header">
           <span class="kpi-title">TD3. Sin Cita (Embalse)</span>
-          <span class="kpi-icon">⏳</span>
+          <div class="kpi-icon">⏳</div>
         </div>
         <div class="kpi-val" id="kpi3">14.680</div>
         <div class="kpi-foot">
@@ -281,7 +356,7 @@
       <div class="kpi-card purple">
         <div class="kpi-header">
           <span class="kpi-title">TD4. Resultados Listos</span>
-          <span class="kpi-icon">🩺</span>
+          <div class="kpi-icon">🩺</div>
         </div>
         <div class="kpi-val" id="kpi4">14.006</div>
         <div class="kpi-foot">
@@ -292,104 +367,104 @@
     </div>
 
     <!-- PANELES DE GRÁFICOS -->
-    <div class="chart-grid" id="chartSection">
+    <div class="chart-grid" id="chartSection" style="display: grid;">
       <div class="panel">
         <div class="panel-head">
           <div>
             <div class="panel-title" id="barChartTitle">Evolución Cronológica de las 4 Tablas Dinámicas</div>
             <div class="panel-sub" id="barChartSub">Todas las Áreas y Modalidades | Demanda vs Cita vs Embalse vs Resultados</div>
           </div>
-          <span class="badge-sub" style="background:#e2e8f0; color:#334155;" id="barPeriodBadge">Ene - Oct 2026</span>
+          <span class="badge-pill blue" id="barPeriodBadge">Ene - Oct 2026</span>
         </div>
 
         <div class="chart-legend-bar">
-          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#0284c7;"></span><span>TD1. Generadas (Total)</span></div>
-          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#16a34a;"></span><span>TD2. Con Cita Asignada</span></div>
-          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#dc2626;"></span><span>TD3. Sin Cita (Embalse)</span></div>
-          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#7c3aed;"></span><span>TD4. Con Resultados</span></div>
+          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#005696;"></span><span>TD1. Generadas (Total)</span></div>
+          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#0d8a4a;"></span><span>TD2. Con Cita Asignada</span></div>
+          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#cf222e;"></span><span>TD3. Sin Cita (Embalse)</span></div>
+          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#6f42c1;"></span><span>TD4. Con Resultados</span></div>
         </div>
 
-        <div class="svg-chart-container" id="barChartBox"><svg viewBox="0 0 720 200"><line x1="45" y1="170" x2="710" y2="170" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="174" font-size="10" fill="#94a3b8" text-anchor="end">0</text><line x1="45" y1="132.5" x2="710" y2="132.5" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="136.5" font-size="10" fill="#94a3b8" text-anchor="end">1.4k</text><line x1="45" y1="95" x2="710" y2="95" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="99" font-size="10" fill="#94a3b8" text-anchor="end">2.7k</text><line x1="45" y1="57.5" x2="710" y2="57.5" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="61.5" font-size="10" fill="#94a3b8" text-anchor="end">4.0k</text><line x1="45" y1="20" x2="710" y2="20" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="24" font-size="10" fill="#94a3b8" text-anchor="end">5.4k</text><rect x="54.9" y="87.75" width="11.549999999999999" height="82.25" fill="#0284c7" rx="2">
+        <div class="svg-chart-container" id="barChartBox"><svg viewBox="0 0 720 200"><line x1="45" y1="170" x2="710" y2="170" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="174" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">0</text><line x1="45" y1="132.5" x2="710" y2="132.5" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="136.5" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">1.4k</text><line x1="45" y1="95" x2="710" y2="95" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="99" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">2.7k</text><line x1="45" y1="57.5" x2="710" y2="57.5" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="61.5" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">4.0k</text><line x1="45" y1="20" x2="710" y2="20" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="24" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">5.4k</text><rect x="54.24" y="87.75" width="11.879999999999999" height="82.25" fill="#005696" rx="3">
                     <title>Ene - TD1. Total Generadas: 2961</title>
-                  </rect><rect x="68.45" y="120.47222222222223" width="11.549999999999999" height="49.52777777777778" fill="#16a34a" rx="2">
+                  </rect><rect x="68.12" y="120.47222222222223" width="11.879999999999999" height="49.52777777777778" fill="#0d8a4a" rx="3">
                     <title>Ene - TD2. Con Cita Asignada: 1783</title>
-                  </rect><rect x="82" y="139.38888888888889" width="11.549999999999999" height="30.61111111111111" fill="#dc2626" rx="2">
+                  </rect><rect x="82" y="139.38888888888889" width="11.879999999999999" height="30.61111111111111" fill="#cf222e" rx="3">
                     <title>Ene - TD3. Sin Cita (Embalse): 1102</title>
-                  </rect><rect x="95.55" y="146.61111111111111" width="11.549999999999999" height="23.388888888888886" fill="#7c3aed" rx="2">
+                  </rect><rect x="95.88" y="146.61111111111111" width="11.879999999999999" height="23.388888888888886" fill="#6f42c1" rx="3">
                     <title>Ene - TD4. Con Resultados: 842</title>
-                  </rect><text x="78" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Ene</text><rect x="120.9" y="72.30555555555556" width="11.549999999999999" height="97.69444444444444" fill="#0284c7" rx="2">
+                  </rect><text x="78" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Ene</text><rect x="120.24" y="72.30555555555556" width="11.879999999999999" height="97.69444444444444" fill="#005696" rx="3">
                     <title>Feb - TD1. Total Generadas: 3517</title>
-                  </rect><rect x="134.45000000000002" y="109.13888888888889" width="11.549999999999999" height="60.86111111111111" fill="#16a34a" rx="2">
+                  </rect><rect x="134.12" y="109.13888888888889" width="11.879999999999999" height="60.86111111111111" fill="#0d8a4a" rx="3">
                     <title>Feb - TD2. Con Cita Asignada: 2191</title>
-                  </rect><rect x="148" y="136.77777777777777" width="11.549999999999999" height="33.22222222222222" fill="#dc2626" rx="2">
+                  </rect><rect x="148" y="136.77777777777777" width="11.879999999999999" height="33.22222222222222" fill="#cf222e" rx="3">
                     <title>Feb - TD3. Sin Cita (Embalse): 1196</title>
-                  </rect><rect x="161.55" y="103" width="11.549999999999999" height="67" fill="#7c3aed" rx="2">
+                  </rect><rect x="161.88" y="103" width="11.879999999999999" height="67" fill="#6f42c1" rx="3">
                     <title>Feb - TD4. Con Resultados: 2412</title>
-                  </rect><text x="144" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Feb</text><rect x="186.9" y="63.638888888888886" width="11.549999999999999" height="106.36111111111111" fill="#0284c7" rx="2">
+                  </rect><text x="144" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Feb</text><rect x="186.24" y="63.638888888888886" width="11.879999999999999" height="106.36111111111111" fill="#005696" rx="3">
                     <title>Mar - TD1. Total Generadas: 3829</title>
-                  </rect><rect x="200.45000000000002" y="106.08333333333334" width="11.549999999999999" height="63.916666666666664" fill="#16a34a" rx="2">
+                  </rect><rect x="200.12" y="106.08333333333334" width="11.879999999999999" height="63.916666666666664" fill="#0d8a4a" rx="3">
                     <title>Mar - TD2. Con Cita Asignada: 2301</title>
-                  </rect><rect x="214" y="131.13888888888889" width="11.549999999999999" height="38.86111111111111" fill="#dc2626" rx="2">
+                  </rect><rect x="214" y="131.13888888888889" width="11.879999999999999" height="38.86111111111111" fill="#cf222e" rx="3">
                     <title>Mar - TD3. Sin Cita (Embalse): 1399</title>
-                  </rect><rect x="227.55" y="129.58333333333334" width="11.549999999999999" height="40.416666666666664" fill="#7c3aed" rx="2">
+                  </rect><rect x="227.88" y="129.58333333333334" width="11.879999999999999" height="40.416666666666664" fill="#6f42c1" rx="3">
                     <title>Mar - TD4. Con Resultados: 1455</title>
-                  </rect><text x="210" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Mar</text><rect x="252.9" y="64.55555555555554" width="11.549999999999999" height="105.44444444444446" fill="#0284c7" rx="2">
+                  </rect><text x="210" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Mar</text><rect x="252.24" y="64.55555555555554" width="11.879999999999999" height="105.44444444444446" fill="#005696" rx="3">
                     <title>Abr - TD1. Total Generadas: 3796</title>
-                  </rect><rect x="266.45" y="111.66666666666666" width="11.549999999999999" height="58.333333333333336" fill="#16a34a" rx="2">
+                  </rect><rect x="266.12" y="111.66666666666666" width="11.879999999999999" height="58.333333333333336" fill="#0d8a4a" rx="3">
                     <title>Abr - TD2. Con Cita Asignada: 2100</title>
-                  </rect><rect x="280" y="123.30555555555556" width="11.549999999999999" height="46.69444444444444" fill="#dc2626" rx="2">
+                  </rect><rect x="280" y="123.30555555555556" width="11.879999999999999" height="46.69444444444444" fill="#cf222e" rx="3">
                     <title>Abr - TD3. Sin Cita (Embalse): 1681</title>
-                  </rect><rect x="293.55" y="126.05555555555554" width="11.549999999999999" height="43.94444444444445" fill="#7c3aed" rx="2">
+                  </rect><rect x="293.88" y="126.05555555555554" width="11.879999999999999" height="43.94444444444445" fill="#6f42c1" rx="3">
                     <title>Abr - TD4. Con Resultados: 1582</title>
-                  </rect><text x="276" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Abr</text><rect x="318.9" y="49.277777777777786" width="11.549999999999999" height="120.72222222222221" fill="#0284c7" rx="2">
+                  </rect><text x="276" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Abr</text><rect x="318.24" y="49.277777777777786" width="11.879999999999999" height="120.72222222222221" fill="#005696" rx="3">
                     <title>May - TD1. Total Generadas: 4346</title>
-                  </rect><rect x="332.45" y="93.55555555555556" width="11.549999999999999" height="76.44444444444444" fill="#16a34a" rx="2">
+                  </rect><rect x="332.12" y="93.55555555555556" width="11.879999999999999" height="76.44444444444444" fill="#0d8a4a" rx="3">
                     <title>May - TD2. Con Cita Asignada: 2752</title>
-                  </rect><rect x="346" y="126.19444444444444" width="11.549999999999999" height="43.80555555555556" fill="#dc2626" rx="2">
+                  </rect><rect x="346" y="126.19444444444444" width="11.879999999999999" height="43.80555555555556" fill="#cf222e" rx="3">
                     <title>May - TD3. Sin Cita (Embalse): 1577</title>
-                  </rect><rect x="359.54999999999995" y="133.41666666666669" width="11.549999999999999" height="36.58333333333333" fill="#7c3aed" rx="2">
+                  </rect><rect x="359.88" y="133.41666666666669" width="11.879999999999999" height="36.58333333333333" fill="#6f42c1" rx="3">
                     <title>May - TD4. Con Resultados: 1317</title>
-                  </rect><text x="342" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">May</text><rect x="384.9" y="41.97222222222223" width="11.549999999999999" height="128.02777777777777" fill="#0284c7" rx="2">
+                  </rect><text x="342" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">May</text><rect x="384.24" y="41.97222222222223" width="11.879999999999999" height="128.02777777777777" fill="#005696" rx="3">
                     <title>Jun - TD1. Total Generadas: 4609</title>
-                  </rect><rect x="398.45" y="87.19444444444446" width="11.549999999999999" height="82.80555555555554" fill="#16a34a" rx="2">
+                  </rect><rect x="398.12" y="87.19444444444446" width="11.879999999999999" height="82.80555555555554" fill="#0d8a4a" rx="3">
                     <title>Jun - TD2. Con Cita Asignada: 2981</title>
-                  </rect><rect x="412" y="124.94444444444446" width="11.549999999999999" height="45.05555555555555" fill="#dc2626" rx="2">
+                  </rect><rect x="412" y="124.94444444444446" width="11.879999999999999" height="45.05555555555555" fill="#cf222e" rx="3">
                     <title>Jun - TD3. Sin Cita (Embalse): 1622</title>
-                  </rect><rect x="425.54999999999995" y="130.75" width="11.549999999999999" height="39.25" fill="#7c3aed" rx="2">
+                  </rect><rect x="425.88" y="130.75" width="11.879999999999999" height="39.25" fill="#6f42c1" rx="3">
                     <title>Jun - TD4. Con Resultados: 1413</title>
-                  </rect><text x="408" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Jun</text><rect x="450.9" y="70.02777777777779" width="11.549999999999999" height="99.97222222222221" fill="#0284c7" rx="2">
+                  </rect><text x="408" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Jun</text><rect x="450.24" y="70.02777777777779" width="11.879999999999999" height="99.97222222222221" fill="#005696" rx="3">
                     <title>Jul - TD1. Total Generadas: 3599</title>
-                  </rect><rect x="464.45" y="108.38888888888889" width="11.549999999999999" height="61.611111111111114" fill="#16a34a" rx="2">
+                  </rect><rect x="464.12" y="108.38888888888889" width="11.879999999999999" height="61.611111111111114" fill="#0d8a4a" rx="3">
                     <title>Jul - TD2. Con Cita Asignada: 2218</title>
-                  </rect><rect x="478" y="131.86111111111111" width="11.549999999999999" height="38.138888888888886" fill="#dc2626" rx="2">
+                  </rect><rect x="478" y="131.86111111111111" width="11.879999999999999" height="38.138888888888886" fill="#cf222e" rx="3">
                     <title>Jul - TD3. Sin Cita (Embalse): 1373</title>
-                  </rect><rect x="491.54999999999995" y="135.02777777777777" width="11.549999999999999" height="34.97222222222222" fill="#7c3aed" rx="2">
+                  </rect><rect x="491.88" y="135.02777777777777" width="11.879999999999999" height="34.97222222222222" fill="#6f42c1" rx="3">
                     <title>Jul - TD4. Con Resultados: 1259</title>
-                  </rect><text x="474" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Jul</text><rect x="516.9" y="74.61111111111111" width="11.549999999999999" height="95.38888888888889" fill="#0284c7" rx="2">
+                  </rect><text x="474" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Jul</text><rect x="516.24" y="74.61111111111111" width="11.879999999999999" height="95.38888888888889" fill="#005696" rx="3">
                     <title>Ago - TD1. Total Generadas: 3434</title>
-                  </rect><rect x="530.4499999999999" y="112.16666666666667" width="11.549999999999999" height="57.83333333333333" fill="#16a34a" rx="2">
+                  </rect><rect x="530.12" y="112.16666666666667" width="11.879999999999999" height="57.83333333333333" fill="#0d8a4a" rx="3">
                     <title>Ago - TD2. Con Cita Asignada: 2082</title>
-                  </rect><rect x="544" y="132.63888888888889" width="11.549999999999999" height="37.361111111111114" fill="#dc2626" rx="2">
+                  </rect><rect x="544" y="132.63888888888889" width="11.879999999999999" height="37.361111111111114" fill="#cf222e" rx="3">
                     <title>Ago - TD3. Sin Cita (Embalse): 1345</title>
-                  </rect><rect x="557.55" y="133.05555555555554" width="11.549999999999999" height="36.94444444444444" fill="#7c3aed" rx="2">
+                  </rect><rect x="557.88" y="133.05555555555554" width="11.879999999999999" height="36.94444444444444" fill="#6f42c1" rx="3">
                     <title>Ago - TD4. Con Resultados: 1330</title>
-                  </rect><text x="540" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Ago</text><rect x="582.9" y="55.80555555555556" width="11.549999999999999" height="114.19444444444444" fill="#0284c7" rx="2">
+                  </rect><text x="540" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Ago</text><rect x="582.24" y="55.80555555555556" width="11.879999999999999" height="114.19444444444444" fill="#005696" rx="3">
                     <title>Set - TD1. Total Generadas: 4111</title>
-                  </rect><rect x="596.4499999999999" y="103.86111111111111" width="11.549999999999999" height="66.13888888888889" fill="#16a34a" rx="2">
+                  </rect><rect x="596.12" y="103.86111111111111" width="11.879999999999999" height="66.13888888888889" fill="#0d8a4a" rx="3">
                     <title>Set - TD2. Con Cita Asignada: 2381</title>
-                  </rect><rect x="610" y="122.25" width="11.549999999999999" height="47.75" fill="#dc2626" rx="2">
+                  </rect><rect x="610" y="122.25" width="11.879999999999999" height="47.75" fill="#cf222e" rx="3">
                     <title>Set - TD3. Sin Cita (Embalse): 1719</title>
-                  </rect><rect x="623.55" y="135.75" width="11.549999999999999" height="34.25" fill="#7c3aed" rx="2">
+                  </rect><rect x="623.88" y="135.75" width="11.879999999999999" height="34.25" fill="#6f42c1" rx="3">
                     <title>Set - TD4. Con Resultados: 1233</title>
-                  </rect><text x="606" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Set</text><rect x="648.9" y="75.75" width="11.549999999999999" height="94.25" fill="#0284c7" rx="2">
+                  </rect><text x="606" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Set</text><rect x="648.24" y="75.75" width="11.879999999999999" height="94.25" fill="#005696" rx="3">
                     <title>Oct - TD1. Total Generadas: 3393</title>
-                  </rect><rect x="662.4499999999999" y="122.08333333333334" width="11.549999999999999" height="47.916666666666664" fill="#16a34a" rx="2">
+                  </rect><rect x="662.12" y="122.08333333333334" width="11.879999999999999" height="47.916666666666664" fill="#0d8a4a" rx="3">
                     <title>Oct - TD2. Con Cita Asignada: 1725</title>
-                  </rect><rect x="676" y="123.72222222222223" width="11.549999999999999" height="46.27777777777778" fill="#dc2626" rx="2">
+                  </rect><rect x="676" y="123.72222222222223" width="11.879999999999999" height="46.27777777777778" fill="#cf222e" rx="3">
                     <title>Oct - TD3. Sin Cita (Embalse): 1666</title>
-                  </rect><rect x="689.55" y="137.69444444444446" width="11.549999999999999" height="32.30555555555556" fill="#7c3aed" rx="2">
+                  </rect><rect x="689.88" y="137.69444444444446" width="11.879999999999999" height="32.30555555555556" fill="#6f42c1" rx="3">
                     <title>Oct - TD4. Con Resultados: 1163</title>
-                  </rect><text x="672" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Oct</text></svg></div>
+                  </rect><text x="672" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Oct</text></svg></div>
       </div>
 
       <div class="panel">
@@ -401,7 +476,7 @@
         </div>
         <div class="donut-layout">
           <div class="donut-svg-box">
-            <svg viewBox="0 0 100 100" id="donutSvg"><circle cx="50" cy="50" r="36" fill="transparent" stroke="#0284c7" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="120.00741877728807" transform="rotate(-90 50 50)"></circle><circle cx="50" cy="50" r="36" fill="transparent" stroke="#10b981" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="121.4453899538534" transform="rotate(79.00226093895466 50 50)"></circle><circle cx="50" cy="50" r="36" fill="transparent" stroke="#f59e0b" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="210.93653338578875" transform="rotate(245.71591967016892 50 50)"></circle></svg>
+            <svg viewBox="0 0 100 100" id="donutSvg"><circle cx="50" cy="50" r="36" fill="transparent" stroke="#005696" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="120.00741877728807" transform="rotate(-90 50 50)"></circle><circle cx="50" cy="50" r="36" fill="transparent" stroke="#00a0df" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="121.4453899538534" transform="rotate(79.00226093895466 50 50)"></circle><circle cx="50" cy="50" r="36" fill="transparent" stroke="#e67e22" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="210.93653338578875" transform="rotate(245.71591967016892 50 50)"></circle></svg>
             <div class="donut-center-text">
               <div class="donut-center-num" id="donutTotal">37.6k</div>
               <div class="donut-center-lbl" id="donutLabel">Total</div>
@@ -409,15 +484,15 @@
           </div>
           <div class="legend-list">
             <div class="legend-item" id="legItemRad" style="opacity: 1;">
-              <span class="legend-color" style="background: #0284c7;"></span>
+              <span class="legend-color" style="background: #005696;"></span>
               <div><strong>Radiología</strong>: <span id="legRad">17.649</span> (<span id="legRadPct">46.9%</span>)</div>
             </div>
             <div class="legend-item" id="legItemUltra" style="opacity: 1;">
-              <span class="legend-color" style="background: #10b981;"></span>
+              <span class="legend-color" style="background: #00a0df;"></span>
               <div><strong>Ultrasonido</strong>: <span id="legUltra">17.410</span> (<span id="legUltraPct">46.3%</span>)</div>
             </div>
             <div class="legend-item" id="legItemMamo" style="opacity: 1;">
-              <span class="legend-color" style="background: #f59e0b;"></span>
+              <span class="legend-color" style="background: #e67e22;"></span>
               <div><strong>Mamografía</strong>: <span id="legMamo">2536</span> (<span id="legMamoPct">6.7%</span>)</div>
             </div>
           </div>
@@ -590,9 +665,9 @@
     let RAW_DATA = {
       td1: {
         rows: [
-          { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", color: "#0284c7", vals: [1634, 1896, 2209, 1965, 2024, 2062, 1683, 1352, 1430, 1394] },
-          { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", color: "#10b981", vals: [1092, 1437, 1380, 1518, 2000, 2245, 1680, 1863, 2384, 1811] },
-          { name: "MAMOGRAFIA", area: "MAMO", color: "#f59e0b", vals: [235, 184, 240, 313, 322, 302, 236, 219, 297, 188] }
+          { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", color: "#005696", vals: [1634, 1896, 2209, 1965, 2024, 2062, 1683, 1352, 1430, 1394] },
+          { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", color: "#00a0df", vals: [1092, 1437, 1380, 1518, 2000, 2245, 1680, 1863, 2384, 1811] },
+          { name: "MAMOGRAFIA", area: "MAMO", color: "#e67e22", vals: [235, 184, 240, 313, 322, 302, 236, 219, 297, 188] }
         ],
         topExams: [
           { name: "ECOGRAFIA ABDOMINAL COMPLETA, TIEMPO REAL CON DOC.", area: "ULTRA", total: 3106, vals: [142, 199, 229, 274, 336, 425, 269, 332, 503, 397] },
@@ -823,35 +898,35 @@
       for (let g = 0; g <= 4; g++) {
         let yVal = Math.round((maxVal / 4) * g);
         let yPos = H - padB - (yVal / maxVal) * chartH;
-        svg += `<line x1="${padL}" y1="${yPos}" x2="${W-10}" y2="${yPos}" stroke="#f1f5f9" stroke-width="1"/>`;
-        svg += `<text x="${padL - 6}" y="${yPos + 4}" font-size="10" fill="#94a3b8" text-anchor="end">${yVal >= 1000 ? (yVal/1000).toFixed(1)+'k' : yVal}</text>`;
+        svg += `<line x1="${padL}" y1="${yPos}" x2="${W-10}" y2="${yPos}" stroke="#e2edf4" stroke-width="1"/>`;
+        svg += `<text x="${padL - 6}" y="${yPos + 4}" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">${yVal >= 1000 ? (yVal/1000).toFixed(1)+'k' : yVal}</text>`;
       }
 
       const numGroups = indices.length;
       const groupW = chartW / numGroups;
-      const barW = Math.max(4, (groupW * 0.7) / 4);
+      const barW = Math.max(4, (groupW * 0.72) / 4);
 
       indices.forEach((mIdx, gIdx) => {
-        const groupX = padL + gIdx * groupW + groupW * 0.15;
+        const groupX = padL + gIdx * groupW + groupW * 0.14;
         const [y1, y2, y3, y4] = getValsAtMonth(mIdx);
 
         const series = [
-          { val: y1, col: "#0284c7", label: "TD1. Total Generadas" },
-          { val: y2, col: "#16a34a", label: "TD2. Con Cita Asignada" },
-          { val: y3, col: "#dc2626", label: "TD3. Sin Cita (Embalse)" },
-          { val: y4, col: "#7c3aed", label: "TD4. Con Resultados" }
+          { val: y1, col: "#005696", label: "TD1. Total Generadas" },
+          { val: y2, col: "#0d8a4a", label: "TD2. Con Cita Asignada" },
+          { val: y3, col: "#cf222e", label: "TD3. Sin Cita (Embalse)" },
+          { val: y4, col: "#6f42c1", label: "TD4. Con Resultados" }
         ];
 
         series.forEach((item, bIdx) => {
           const bH = maxVal > 0 ? (item.val / maxVal) * chartH : 0;
           const bX = groupX + bIdx * (barW + 2);
           const bY = H - padB - bH;
-          svg += `<rect x="${bX}" y="${bY}" width="${barW}" height="${bH}" fill="${item.col}" rx="2">
+          svg += `<rect x="${bX}" y="${bY}" width="${barW}" height="${bH}" fill="${item.col}" rx="3">
                     <title>${MONTHS[mIdx]} - ${item.label}: ${item.val.toLocaleString()}</title>
                   </rect>`;
         });
 
-        svg += `<text x="${groupX + (barW * 4)/2}" y="${H - 10}" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">${MONTHS[mIdx]}</text>`;
+        svg += `<text x="${groupX + (barW * 4)/2}" y="${H - 10}" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">${MONTHS[mIdx]}</text>`;
       });
 
       svg += `</svg>`;
@@ -924,19 +999,19 @@
 
       let svg = ``;
       if (pR > 0) {
-        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#0284c7" stroke-width="14"
+        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#005696" stroke-width="14"
           stroke-dasharray="${c}" stroke-dashoffset="${offR}" transform="rotate(${rotR} 50 50)"/>`;
       }
       if (pU > 0) {
-        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#10b981" stroke-width="14"
+        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#00a0df" stroke-width="14"
           stroke-dasharray="${c}" stroke-dashoffset="${offU}" transform="rotate(${rotU} 50 50)"/>`;
       }
       if (pM > 0) {
-        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#f59e0b" stroke-width="14"
+        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#e67e22" stroke-width="14"
           stroke-dasharray="${c}" stroke-dashoffset="${offM}" transform="rotate(${rotM} 50 50)"/>`;
       }
       if (total === 0) {
-        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#e2e8f0" stroke-width="14"/>`;
+        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#e2edf4" stroke-width="14"/>`;
       }
 
       svgBox.innerHTML = svg;
@@ -1233,6 +1308,14 @@
             h += `<td class="num">${v.toLocaleString()}</td><td class="num" style="font-weight:600;">${v.toLocaleString()}</td></tr>`;
           }
         });
+      } else if (origin !== "ALL") {
+        const topO = ORIGIN_DATA[origin].topExams;
+        h += `<tr class="section-head"><td colspan="${cols.length + 2}">TOP EXÁMENES DE PROCEDENCIA: ${origin}</td></tr>`;
+        topO.forEach((e, idx) => {
+          h += `<tr class="sub-item"><td><strong>${idx + 1}.</strong> ${e.name}</td>`;
+          cols.forEach(() => h += `<td class="num">-</td>`);
+          h += `<td class="num" style="font-weight:600;">${e.total.toLocaleString()}</td></tr>`;
+        });
       }
 
       h += `<tr class="grand-total"><td>Total general</td>`;
@@ -1325,7 +1408,7 @@
       });
 
       if (filteredExams && filteredExams.length > 0) {
-        h += `<tr class="section-head" style="background:#fee2e2; color:#991b1b;"><td colspan="${cols.length + 2}">TOP 10 CUELLOS DE BOTELLA CRÍTICOS EN DEMANDA EMBALSADA (SIN CITA)</td></tr>`;
+        h += `<tr class="section-head" style="background:#fde8e8; color:#cf222e;"><td colspan="${cols.length + 2}">TOP 10 CUELLOS DE BOTELLA CRÍTICOS EN DEMANDA EMBALSADA (SIN CITA)</td></tr>`;
         filteredExams.forEach((e, idx) => {
           h += `<tr class="sub-item"><td><strong>${idx + 1}.</strong> ${e.name}</td>`;
           if (mIdx === -1) {
@@ -1358,7 +1441,7 @@
       let grandTotalSum = 0;
 
       filteredCats.forEach(c => {
-        h += `<tr class="bold-row" style="background:#f3e8ff; color:#581c87;"><td><strong>${c.name}</strong></td>`;
+        h += `<tr class="bold-row" style="background:#f3e8ff; color:#6f42c1;"><td><strong>${c.name}</strong></td>`;
         if (mIdx === -1) {
           c.vals.forEach((v, i) => {
             h += `<td class="num">${v.toLocaleString()}</td>`;
@@ -1463,18 +1546,15 @@
 
     // GENERADOR AUTOMÁTICO DE index.html LIMPIO PARA GITHUB
     function generateGitHubHTML() {
-      // Clona el documento actual y remueve los botones/modales de carga
       let cleanDoc = document.documentElement.cloneNode(true);
       
-      // Remover modal de carga
       let modal = cleanDoc.querySelector("#uploadModal");
       if (modal) modal.remove();
 
-      // Ajustar header: quitar botón de cargar excels y botón de exportar github
       let headerBtns = cleanDoc.querySelector(".header-btns");
       if (headerBtns) {
         headerBtns.innerHTML = `
-          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; background:#1e293b; color:#38bdf8; padding:6px 12px; border-radius:20px; border:1px solid #334155;">
+          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; background:rgba(255,255,255,0.15); color:#ffffff; padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.3);">
             <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
             <span>Producción GitHub Pages</span>
           </div>
@@ -1482,17 +1562,15 @@
         `;
       }
 
-      // Remover referencia de carga en scripts
       let htmlString = "<!DOCTYPE html>\n" + cleanDoc.outerHTML;
 
-      // Descargar como index.html
       const blob = new Blob([htmlString], { type: "text/html;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "index.html";
       link.click();
 
-      alert("¡Se ha generado y descargado tu archivo 'index.html'!\n\nEste archivo está 100% limpio y listo para copiar o subir directamente a tu repositorio de GitHub Pages.");
+      alert("¡Se ha generado y descargado tu archivo 'index.html'!\n\nEste archivo está 100% limpio y listo para subir directamente a tu repositorio de GitHub Pages.");
     }
 
     window.onload = init;
