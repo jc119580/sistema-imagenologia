@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Maestro de Imagenología - Control Operativo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --purple: #7c3aed;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 50px; }
+
+    header {
+      background: #0f172a; color: #fff; padding: 16px 28px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-icon {
+      width: 42px; height: 42px; border-radius: 10px; background: #0284c7;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .brand h1 { font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .badge-sub { font-size: 11px; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+    .brand p { font-size: 12px; color: #94a3b8; }
+    
+    .header-btns { display: flex; gap: 10px; align-items: center; }
+    .btn {
+      padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-github { background: #24292f; color: #fff; border: 1px solid #444c56; }
+    .btn-github:hover { background: #32383f; }
+    .btn-outline { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
+    .btn-outline:hover { background: #334155; }
+    .btn-print { background: #334155; color: #fff; }
+    .btn-print:hover { background: #1e293b; }
+
+    .nav-tabs {
+      background: #fff; border-bottom: 1px solid var(--border);
+      padding: 0 28px; display: flex; gap: 8px; overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 14px 18px; font-size: 13px; font-weight: 600; color: var(--muted);
+      border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent;
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--primary); }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+
+    .filter-bar {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 20px; margin-bottom: 20px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    .filter-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .filter-label { font-size: 13px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    select {
+      padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
+      font-size: 13px; background: #fff; color: var(--text); font-weight: 600; outline: none;
+      cursor: pointer;
+    }
+    select:focus { border-color: var(--primary); }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .kpi-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 18px 20px; position: relative; overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .kpi-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+    .kpi-card.blue::before { background: var(--primary); }
+    .kpi-card.green::before { background: var(--success); }
+    .kpi-card.red::before { background: var(--danger); }
+    .kpi-card.purple::before { background: var(--purple); }
+
+    .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .kpi-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+    .kpi-icon { font-size: 18px; }
+    .kpi-val { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 6px; }
+    .kpi-foot { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); }
+    .badge-pill { padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11px; }
+    .badge-pill.blue { background: #e0f2fe; color: #0369a1; }
+    .badge-pill.green { background: #dcfce7; color: #15803d; }
+    .badge-pill.red { background: #fee2e2; color: #991b1b; }
+    .badge-pill.purple { background: #f3e8ff; color: #6b21a8; }
+
+    .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 992px) { .chart-grid { grid-template-columns: 1fr; } }
+    
+    .panel {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .panel-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .panel-sub { font-size: 12px; color: var(--muted); }
+
+    .chart-legend-bar {
+      display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; padding: 6px 10px;
+      background: #f8fafc; border-radius: 6px; border: 1px solid #edf2f7; font-size: 11.5px;
+    }
+    .chart-legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #334155; }
+    .chart-legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+    .svg-chart-container { width: 100%; height: 240px; position: relative; }
+    svg { width: 100%; height: 100%; overflow: visible; }
+
+    .donut-layout { display: flex; align-items: center; justify-content: space-around; height: 260px; flex-wrap: wrap; gap: 12px; }
+    .donut-svg-box { position: relative; width: 180px; height: 180px; }
+    .donut-center-text {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center; pointer-events: none;
+    }
+    .donut-center-num { font-size: 20px; font-weight: 800; color: var(--text); }
+    .donut-center-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+
+    .legend-list { display: flex; flex-direction: column; gap: 10px; font-size: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+    .table-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 24px;
+    }
+    .table-top {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; background: #fafbfc;
+    }
+    .table-top h3 { font-size: 14px; font-weight: 700; }
+    .table-top span { font-size: 12px; color: var(--muted); }
+
+    .table-wrap { width: 100%; overflow-x: auto; max-height: 560px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; text-align: left; }
+    th {
+      background: #f8fafc; color: #475569; font-weight: 700;
+      padding: 11px 14px; border-bottom: 1px solid var(--border); white-space: nowrap;
+      position: sticky; top: 0; z-index: 10;
+    }
+    td { padding: 9px 14px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+    tr:hover td { background-color: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; font-family: monospace; font-size: 12px; }
+    .bold-row td { font-weight: 700; background: #f8fafc; color: #1e293b; }
+    .section-head td { background: #f1f5f9; font-weight: 800; font-size: 11.5px; letter-spacing: 0.5px; text-transform: uppercase; padding: 7px 14px; }
+    .grand-total td { font-weight: 800; background: #eff6ff; color: #1e3a8a; border-top: 2px solid #bfdbfe; font-size: 13px; }
+    .sub-item td:first-child { padding-left: 28px; color: #334155; }
+
+    #uploadModal {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;
+    }
+    .modal-box {
+      background: #fff; border-radius: 12px; width: 560px; max-width: 90%;
+      padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .dropzone {
+      border: 2px dashed #94a3b8; border-radius: 8px; padding: 24px; text-align: center;
+      margin: 12px 0; cursor: pointer; transition: 0.2s; background: #f8fafc;
+    }
+    .dropzone:hover { border-color: var(--primary); background: #f0f9ff; }
+
+    /* ESTILOS PARA IMPRESIÓN LIMPIA */
+    @media print {
+      body { background: #fff; padding-bottom: 0; }
+      header .header-btns, .filter-bar, .nav-tabs, #uploadModal { display: none !important; }
+      .container { max-width: 100%; margin: 0; padding: 0; }
+      .kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .panel, .table-card { box-shadow: none; border: 1px solid #cbd5e1; page-break-inside: avoid; }
+      .table-wrap { max-height: none; overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🏥</div>
+      <div>
+        <h1>IMAGENOLOGÍA DINÁMICA <span class="badge-sub">Panel Maestro</span></h1>
+        <p>Control de Solicitudes, Citas, Demanda Embalsada y Resultados</p>
+      </div>
+    </div>
+    <div class="header-btns">
+          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; background:#1e293b; color:#38bdf8; padding:6px 12px; border-radius:20px; border:1px solid #334155;">
+            <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
+            <span>Producción GitHub Pages</span>
+          </div>
+          <button class="btn btn-outline" onclick="resetToOfficial()">↺ Restablecer</button>
+        </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('consolidada')">📊 Vista Consolidada</button>
+    <button class="tab-btn" onclick="switchTab('origen')">🏥 Distribución por Área Asistencial</button>
+    <button class="tab-btn" onclick="switchTab('td1')">📋 1. Solicitudes Generadas (TD1)</button>
+    <button class="tab-btn" onclick="switchTab('td2')">📅 2. Solicitudes con Cita (TD2)</button>
+    <button class="tab-btn" onclick="switchTab('td3')">⏳ 3. Solicitudes sin Cita (TD3)</button>
+    <button class="tab-btn" onclick="switchTab('td4')">🩺 4. Imágenes con Resultados (TD4)</button>
+  </nav>
+
+  <div class="container">
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">🔍 Filtros Dinámicos:</span>
+        <select id="monthFilter" onchange="applyFilters()"><option value="ALL">Todo el Periodo (Ene - Oct 2026)</option><option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option><option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option><option value="6">Julio</option><option value="7">Agosto</option><option value="8">Setiembre</option><option value="9">Octubre</option></select>
+        
+        <select id="originFilter" onchange="applyFilters()">
+          <option value="ALL">Todas las Áreas de Origen</option>
+          <option value="CONSULTA EXTERNA">Consulta Externa</option>
+          <option value="URGENCIAS / EMERGENCIA">Urgencias / Emergencia</option>
+          <option value="HOSPITALIZACION">Hospitalización</option>
+          <option value="CENTRO QUIRURGICO">Centro Quirúrgico</option>
+        </select>
+
+        <select id="areaFilter" onchange="applyFilters()">
+          <option value="ALL">Todas las Modalidades</option>
+          <option value="RAD">Radiología Diagnóstica</option>
+          <option value="ULTRA">Ultrasonido Diagnóstico</option>
+          <option value="MAMO">Mamografía</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir Reporte</button>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-header">
+          <span class="kpi-title">TD1. Generadas (Demanda)</span>
+          <span class="kpi-icon">📋</span>
+        </div>
+        <div class="kpi-val" id="kpi1">37.595</div>
+        <div class="kpi-foot">
+          <span>TOTAL DE SOLICITUDES</span>
+          <span class="badge-pill blue">100%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card green">
+        <div class="kpi-header">
+          <span class="kpi-title">TD2. Con Cita Asignada</span>
+          <span class="kpi-icon">📅</span>
+        </div>
+        <div class="kpi-val" id="kpi2">22.514</div>
+        <div class="kpi-foot">
+          <span>ÓRDENES PROGRAMADAS</span>
+          <span class="badge-pill green" id="kpi2Pct">59.9%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card red">
+        <div class="kpi-header">
+          <span class="kpi-title">TD3. Sin Cita (Embalse)</span>
+          <span class="kpi-icon">⏳</span>
+        </div>
+        <div class="kpi-val" id="kpi3">14.680</div>
+        <div class="kpi-foot">
+          <span>DEMANDA PENDIENTE</span>
+          <span class="badge-pill red" id="kpi3Pct">39.0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card purple">
+        <div class="kpi-header">
+          <span class="kpi-title">TD4. Resultados Listos</span>
+          <span class="kpi-icon">🩺</span>
+        </div>
+        <div class="kpi-val" id="kpi4">14.006</div>
+        <div class="kpi-foot">
+          <span>INFORMES EMITIDOS</span>
+          <span class="badge-pill purple" id="kpi4Pct">37.3% Total</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANELES DE GRÁFICOS -->
+    <div class="chart-grid" id="chartSection">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title" id="barChartTitle">Evolución Cronológica de las 4 Tablas Dinámicas</div>
+            <div class="panel-sub" id="barChartSub">Todas las Áreas y Modalidades | Demanda vs Cita vs Embalse vs Resultados</div>
+          </div>
+          <span class="badge-sub" style="background:#e2e8f0; color:#334155;" id="barPeriodBadge">Ene - Oct 2026</span>
+        </div>
+
+        <div class="chart-legend-bar">
+          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#0284c7;"></span><span>TD1. Generadas (Total)</span></div>
+          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#16a34a;"></span><span>TD2. Con Cita Asignada</span></div>
+          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#dc2626;"></span><span>TD3. Sin Cita (Embalse)</span></div>
+          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#7c3aed;"></span><span>TD4. Con Resultados</span></div>
+        </div>
+
+        <div class="svg-chart-container" id="barChartBox"><svg viewBox="0 0 720 200"><line x1="45" y1="170" x2="710" y2="170" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="174" font-size="10" fill="#94a3b8" text-anchor="end">0</text><line x1="45" y1="132.5" x2="710" y2="132.5" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="136.5" font-size="10" fill="#94a3b8" text-anchor="end">1.4k</text><line x1="45" y1="95" x2="710" y2="95" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="99" font-size="10" fill="#94a3b8" text-anchor="end">2.7k</text><line x1="45" y1="57.5" x2="710" y2="57.5" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="61.5" font-size="10" fill="#94a3b8" text-anchor="end">4.0k</text><line x1="45" y1="20" x2="710" y2="20" stroke="#f1f5f9" stroke-width="1"></line><text x="39" y="24" font-size="10" fill="#94a3b8" text-anchor="end">5.4k</text><rect x="54.9" y="87.75" width="11.549999999999999" height="82.25" fill="#0284c7" rx="2">
+                    <title>Ene - TD1. Total Generadas: 2961</title>
+                  </rect><rect x="68.45" y="120.47222222222223" width="11.549999999999999" height="49.52777777777778" fill="#16a34a" rx="2">
+                    <title>Ene - TD2. Con Cita Asignada: 1783</title>
+                  </rect><rect x="82" y="139.38888888888889" width="11.549999999999999" height="30.61111111111111" fill="#dc2626" rx="2">
+                    <title>Ene - TD3. Sin Cita (Embalse): 1102</title>
+                  </rect><rect x="95.55" y="146.61111111111111" width="11.549999999999999" height="23.388888888888886" fill="#7c3aed" rx="2">
+                    <title>Ene - TD4. Con Resultados: 842</title>
+                  </rect><text x="78" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Ene</text><rect x="120.9" y="72.30555555555556" width="11.549999999999999" height="97.69444444444444" fill="#0284c7" rx="2">
+                    <title>Feb - TD1. Total Generadas: 3517</title>
+                  </rect><rect x="134.45000000000002" y="109.13888888888889" width="11.549999999999999" height="60.86111111111111" fill="#16a34a" rx="2">
+                    <title>Feb - TD2. Con Cita Asignada: 2191</title>
+                  </rect><rect x="148" y="136.77777777777777" width="11.549999999999999" height="33.22222222222222" fill="#dc2626" rx="2">
+                    <title>Feb - TD3. Sin Cita (Embalse): 1196</title>
+                  </rect><rect x="161.55" y="103" width="11.549999999999999" height="67" fill="#7c3aed" rx="2">
+                    <title>Feb - TD4. Con Resultados: 2412</title>
+                  </rect><text x="144" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Feb</text><rect x="186.9" y="63.638888888888886" width="11.549999999999999" height="106.36111111111111" fill="#0284c7" rx="2">
+                    <title>Mar - TD1. Total Generadas: 3829</title>
+                  </rect><rect x="200.45000000000002" y="106.08333333333334" width="11.549999999999999" height="63.916666666666664" fill="#16a34a" rx="2">
+                    <title>Mar - TD2. Con Cita Asignada: 2301</title>
+                  </rect><rect x="214" y="131.13888888888889" width="11.549999999999999" height="38.86111111111111" fill="#dc2626" rx="2">
+                    <title>Mar - TD3. Sin Cita (Embalse): 1399</title>
+                  </rect><rect x="227.55" y="129.58333333333334" width="11.549999999999999" height="40.416666666666664" fill="#7c3aed" rx="2">
+                    <title>Mar - TD4. Con Resultados: 1455</title>
+                  </rect><text x="210" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Mar</text><rect x="252.9" y="64.55555555555554" width="11.549999999999999" height="105.44444444444446" fill="#0284c7" rx="2">
+                    <title>Abr - TD1. Total Generadas: 3796</title>
+                  </rect><rect x="266.45" y="111.66666666666666" width="11.549999999999999" height="58.333333333333336" fill="#16a34a" rx="2">
+                    <title>Abr - TD2. Con Cita Asignada: 2100</title>
+                  </rect><rect x="280" y="123.30555555555556" width="11.549999999999999" height="46.69444444444444" fill="#dc2626" rx="2">
+                    <title>Abr - TD3. Sin Cita (Embalse): 1681</title>
+                  </rect><rect x="293.55" y="126.05555555555554" width="11.549999999999999" height="43.94444444444445" fill="#7c3aed" rx="2">
+                    <title>Abr - TD4. Con Resultados: 1582</title>
+                  </rect><text x="276" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Abr</text><rect x="318.9" y="49.277777777777786" width="11.549999999999999" height="120.72222222222221" fill="#0284c7" rx="2">
+                    <title>May - TD1. Total Generadas: 4346</title>
+                  </rect><rect x="332.45" y="93.55555555555556" width="11.549999999999999" height="76.44444444444444" fill="#16a34a" rx="2">
+                    <title>May - TD2. Con Cita Asignada: 2752</title>
+                  </rect><rect x="346" y="126.19444444444444" width="11.549999999999999" height="43.80555555555556" fill="#dc2626" rx="2">
+                    <title>May - TD3. Sin Cita (Embalse): 1577</title>
+                  </rect><rect x="359.54999999999995" y="133.41666666666669" width="11.549999999999999" height="36.58333333333333" fill="#7c3aed" rx="2">
+                    <title>May - TD4. Con Resultados: 1317</title>
+                  </rect><text x="342" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">May</text><rect x="384.9" y="41.97222222222223" width="11.549999999999999" height="128.02777777777777" fill="#0284c7" rx="2">
+                    <title>Jun - TD1. Total Generadas: 4609</title>
+                  </rect><rect x="398.45" y="87.19444444444446" width="11.549999999999999" height="82.80555555555554" fill="#16a34a" rx="2">
+                    <title>Jun - TD2. Con Cita Asignada: 2981</title>
+                  </rect><rect x="412" y="124.94444444444446" width="11.549999999999999" height="45.05555555555555" fill="#dc2626" rx="2">
+                    <title>Jun - TD3. Sin Cita (Embalse): 1622</title>
+                  </rect><rect x="425.54999999999995" y="130.75" width="11.549999999999999" height="39.25" fill="#7c3aed" rx="2">
+                    <title>Jun - TD4. Con Resultados: 1413</title>
+                  </rect><text x="408" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Jun</text><rect x="450.9" y="70.02777777777779" width="11.549999999999999" height="99.97222222222221" fill="#0284c7" rx="2">
+                    <title>Jul - TD1. Total Generadas: 3599</title>
+                  </rect><rect x="464.45" y="108.38888888888889" width="11.549999999999999" height="61.611111111111114" fill="#16a34a" rx="2">
+                    <title>Jul - TD2. Con Cita Asignada: 2218</title>
+                  </rect><rect x="478" y="131.86111111111111" width="11.549999999999999" height="38.138888888888886" fill="#dc2626" rx="2">
+                    <title>Jul - TD3. Sin Cita (Embalse): 1373</title>
+                  </rect><rect x="491.54999999999995" y="135.02777777777777" width="11.549999999999999" height="34.97222222222222" fill="#7c3aed" rx="2">
+                    <title>Jul - TD4. Con Resultados: 1259</title>
+                  </rect><text x="474" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Jul</text><rect x="516.9" y="74.61111111111111" width="11.549999999999999" height="95.38888888888889" fill="#0284c7" rx="2">
+                    <title>Ago - TD1. Total Generadas: 3434</title>
+                  </rect><rect x="530.4499999999999" y="112.16666666666667" width="11.549999999999999" height="57.83333333333333" fill="#16a34a" rx="2">
+                    <title>Ago - TD2. Con Cita Asignada: 2082</title>
+                  </rect><rect x="544" y="132.63888888888889" width="11.549999999999999" height="37.361111111111114" fill="#dc2626" rx="2">
+                    <title>Ago - TD3. Sin Cita (Embalse): 1345</title>
+                  </rect><rect x="557.55" y="133.05555555555554" width="11.549999999999999" height="36.94444444444444" fill="#7c3aed" rx="2">
+                    <title>Ago - TD4. Con Resultados: 1330</title>
+                  </rect><text x="540" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Ago</text><rect x="582.9" y="55.80555555555556" width="11.549999999999999" height="114.19444444444444" fill="#0284c7" rx="2">
+                    <title>Set - TD1. Total Generadas: 4111</title>
+                  </rect><rect x="596.4499999999999" y="103.86111111111111" width="11.549999999999999" height="66.13888888888889" fill="#16a34a" rx="2">
+                    <title>Set - TD2. Con Cita Asignada: 2381</title>
+                  </rect><rect x="610" y="122.25" width="11.549999999999999" height="47.75" fill="#dc2626" rx="2">
+                    <title>Set - TD3. Sin Cita (Embalse): 1719</title>
+                  </rect><rect x="623.55" y="135.75" width="11.549999999999999" height="34.25" fill="#7c3aed" rx="2">
+                    <title>Set - TD4. Con Resultados: 1233</title>
+                  </rect><text x="606" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Set</text><rect x="648.9" y="75.75" width="11.549999999999999" height="94.25" fill="#0284c7" rx="2">
+                    <title>Oct - TD1. Total Generadas: 3393</title>
+                  </rect><rect x="662.4499999999999" y="122.08333333333334" width="11.549999999999999" height="47.916666666666664" fill="#16a34a" rx="2">
+                    <title>Oct - TD2. Con Cita Asignada: 1725</title>
+                  </rect><rect x="676" y="123.72222222222223" width="11.549999999999999" height="46.27777777777778" fill="#dc2626" rx="2">
+                    <title>Oct - TD3. Sin Cita (Embalse): 1666</title>
+                  </rect><rect x="689.55" y="137.69444444444446" width="11.549999999999999" height="32.30555555555556" fill="#7c3aed" rx="2">
+                    <title>Oct - TD4. Con Resultados: 1163</title>
+                  </rect><text x="672" y="190" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Oct</text></svg></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title" id="donutTitle">Distribución por Modalidad</div>
+            <div class="panel-sub" id="donutSub">Proporción de Solicitudes según filtros</div>
+          </div>
+        </div>
+        <div class="donut-layout">
+          <div class="donut-svg-box">
+            <svg viewBox="0 0 100 100" id="donutSvg"><circle cx="50" cy="50" r="36" fill="transparent" stroke="#0284c7" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="120.00741877728807" transform="rotate(-90 50 50)"></circle><circle cx="50" cy="50" r="36" fill="transparent" stroke="#10b981" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="121.4453899538534" transform="rotate(79.00226093895466 50 50)"></circle><circle cx="50" cy="50" r="36" fill="transparent" stroke="#f59e0b" stroke-width="14" stroke-dasharray="226.1946710584651" stroke-dashoffset="210.93653338578875" transform="rotate(245.71591967016892 50 50)"></circle></svg>
+            <div class="donut-center-text">
+              <div class="donut-center-num" id="donutTotal">37.6k</div>
+              <div class="donut-center-lbl" id="donutLabel">Total</div>
+            </div>
+          </div>
+          <div class="legend-list">
+            <div class="legend-item" id="legItemRad" style="opacity: 1;">
+              <span class="legend-color" style="background: #0284c7;"></span>
+              <div><strong>Radiología</strong>: <span id="legRad">17.649</span> (<span id="legRadPct">46.9%</span>)</div>
+            </div>
+            <div class="legend-item" id="legItemUltra" style="opacity: 1;">
+              <span class="legend-color" style="background: #10b981;"></span>
+              <div><strong>Ultrasonido</strong>: <span id="legUltra">17.410</span> (<span id="legUltraPct">46.3%</span>)</div>
+            </div>
+            <div class="legend-item" id="legItemMamo" style="opacity: 1;">
+              <span class="legend-color" style="background: #f59e0b;"></span>
+              <div><strong>Mamografía</strong>: <span id="legMamo">2536</span> (<span id="legMamoPct">6.7%</span>)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENEDOR DE TABLAS -->
+    <div class="table-card">
+      <div class="table-top">
+        <h3 id="tableCardTitle">📑 MATRIZ CONSOLIDADA DE LAS 4 TABLAS DINÁMICAS</h3>
+        <span id="tableMetaInfo">Filtros: Todas las Áreas | Periodo: Ene a Oct 2026</span>
+      </div>
+      <div class="table-wrap" id="tableContainer">
+        <table>
+          <thead>
+            <tr>
+              <th>Área / Modalidad Diagnóstica</th>
+              <th class="num">TD1. Total Generadas</th>
+              <th class="num">TD2. Con Cita</th>
+              <th class="num">% Asignación</th>
+              <th class="num">TD3. Sin Cita (Embalse)</th>
+              <th class="num">% Embalse</th>
+              <th class="num">TD4. Con Resultados</th>
+              <th class="num">% Cobertura</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+          <tr>
+            <td><strong>🔵 RADIOLOGIA DIAGNOSTICA</strong></td>
+            <td class="num">17.649</td>
+            <td class="num" style="color:var(--success); font-weight:700;">15.638</td>
+            <td class="num">88.6%</td>
+            <td class="num" style="color:var(--danger); font-weight:700;">1719</td>
+            <td class="num">9.7%</td>
+            <td class="num" style="color:var(--purple); font-weight:700;">7259</td>
+            <td class="num">41.1%</td>
+          </tr>
+        
+          <tr>
+            <td><strong>🟢 ULTRASONIDO DIAGNOSTICO</strong></td>
+            <td class="num">17.410</td>
+            <td class="num" style="color:var(--success); font-weight:700;">6875</td>
+            <td class="num">39.5%</td>
+            <td class="num" style="color:var(--danger); font-weight:700;">10.426</td>
+            <td class="num">59.9%</td>
+            <td class="num" style="color:var(--purple); font-weight:700;">6745</td>
+            <td class="num">38.7%</td>
+          </tr>
+        
+          <tr>
+            <td><strong>🟡 MAMOGRAFIA</strong></td>
+            <td class="num">2536</td>
+            <td class="num" style="color:var(--success); font-weight:700;">1</td>
+            <td class="num">0.0%</td>
+            <td class="num" style="color:var(--danger); font-weight:700;">2535</td>
+            <td class="num">100.0%</td>
+            <td class="num" style="color:var(--purple); font-weight:700;">2</td>
+            <td class="num">0.1%</td>
+          </tr>
+        
+            <tr class="grand-total">
+              <td>Total General Seleccionado</td>
+              <td class="num">37.595</td>
+              <td class="num">22.514</td>
+              <td class="num">59.9%</td>
+              <td class="num">14.680</td>
+              <td class="num">39.0%</td>
+              <td class="num">14.006</td>
+              <td class="num">37.3%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL DE CARGA -->
+  
+
+  <script>
+    let MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Set", "Oct"];
+    const FULL_MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"];
+
+    let ORIGIN_MONTHLY_DB = {
+      "CONSULTA EXTERNA": {
+        "RAD": {
+          solic: [1087, 1471, 1729, 1555, 1664, 1709, 1354, 1152, 1374, 1251],
+          cita:  [988, 1371, 1572, 1424, 1481, 1500, 1176, 995, 1168, 905],
+          sincita:[99, 100, 157, 131, 183, 209, 178, 157, 206, 346],
+          resul: [468, 1546, 655, 1043, 506, 477, 634, 584, 119, 285]
+        },
+        "ULTRA": {
+          solic: [1273, 1606, 1569, 1632, 2155, 2395, 1812, 1692, 2053, 1587],
+          cita:  [395, 434, 305, 310, 959, 1149, 721, 680, 770, 384],
+          sincita:[878, 1172, 1264, 1322, 1196, 1246, 1091, 1012, 1283, 1203],
+          resul: [183, 604, 704, 306, 744, 848, 545, 689, 997, 762]
+        },
+        "MAMO": {
+          solic: [235, 184, 240, 313, 322, 302, 236, 219, 297, 188],
+          cita:  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+          sincita:[235, 183, 240, 313, 322, 302, 236, 219, 297, 188],
+          resul: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+        }
+      },
+      "URGENCIAS / EMERGENCIA": {
+        "RAD": {
+          solic: [424, 410, 453, 370, 341, 341, 317, 413, 444, 425],
+          cita:  [384, 362, 389, 314, 276, 285, 272, 368, 377, 367],
+          sincita:[40, 48, 64, 56, 65, 56, 45, 45, 67, 58],
+          resul: [178, 233, 56, 181, 32, 43, 34, 25, 55, 47]
+        },
+        "ULTRA": {
+          solic: [28, 45, 56, 63, 54, 64, 68, 56, 87, 75],
+          cita:  [5, 16, 27, 33, 23, 34, 39, 21, 52, 39],
+          sincita:[23, 29, 29, 30, 31, 30, 29, 35, 35, 36],
+          resul: [5, 19, 32, 35, 22, 34, 38, 20, 52, 38]
+        },
+        "MAMO": {
+          solic: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+          cita:  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          sincita:[1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+          resul: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        }
+      },
+      "HOSPITALIZACION": {
+        "RAD": {
+          solic: [9, 6, 8, 14, 15, 11, 10, 12, 12, 25],
+          cita:  [6, 4, 6, 10, 10, 9, 7, 9, 8, 16],
+          sincita:[3, 2, 2, 4, 5, 2, 3, 3, 4, 9],
+          resul: [5, 7, 2, 8, 4, 4, 4, 4, 5, 14]
+        },
+        "ULTRA": {
+          solic: [8, 6, 3, 11, 9, 8, 6, 14, 13, 17],
+          cita:  [4, 3, 2, 8, 5, 5, 3, 9, 6, 14],
+          sincita:[4, 3, 1, 3, 4, 3, 3, 5, 7, 3],
+          resul: [3, 2, 5, 9, 9, 7, 4, 8, 5, 16]
+        },
+        "MAMO": {
+          solic: [0, 0, 0, 1, 0, 0, 0, 0, 1, 3],
+          cita:  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          sincita:[0, 0, 0, 1, 0, 0, 0, 0, 1, 3],
+          resul: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        }
+      },
+      "CENTRO QUIRURGICO": {
+        "RAD": {
+          solic: [1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+          cita:  [1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+          sincita:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          resul: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+        },
+        "ULTRA": {
+          solic: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+          cita:  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          sincita:[0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+          resul: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        },
+        "MAMO": {
+          solic: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          cita:  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          sincita:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          resul: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        }
+      }
+    };
+
+    let RAW_DATA = {
+      td1: {
+        rows: [
+          { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", color: "#0284c7", vals: [1634, 1896, 2209, 1965, 2024, 2062, 1683, 1352, 1430, 1394] },
+          { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", color: "#10b981", vals: [1092, 1437, 1380, 1518, 2000, 2245, 1680, 1863, 2384, 1811] },
+          { name: "MAMOGRAFIA", area: "MAMO", color: "#f59e0b", vals: [235, 184, 240, 313, 322, 302, 236, 219, 297, 188] }
+        ],
+        topExams: [
+          { name: "ECOGRAFIA ABDOMINAL COMPLETA, TIEMPO REAL CON DOC.", area: "ULTRA", total: 3106, vals: [142, 199, 229, 274, 336, 425, 269, 332, 503, 397] },
+          { name: "ECOGRAFIA TRANSVAGINAL", area: "ULTRA", total: 3059, vals: [284, 324, 300, 374, 354, 386, 195, 258, 313, 271] },
+          { name: "RX DE TORAX; VISTA UNICA, POSTERO-ANTERIOR", area: "RAD", total: 2206, vals: [203, 228, 225, 255, 295, 288, 246, 171, 155, 140] },
+          { name: "MAMOGRAFIA DE TAMIZAJE, BILATERAL (2 IMÁGENES)", area: "MAMO", total: 2053, vals: [132, 138, 143, 251, 289, 242, 215, 191, 274, 178] },
+          { name: "ECOGRAFIA DE MAMAS (BILATERAL O UNILATERAL)", area: "ULTRA", total: 1939, vals: [143, 118, 124, 207, 240, 301, 176, 180, 292, 158] },
+          { name: "ECOGRAFIA SUPRAPUBICA PROSTATICA", area: "ULTRA", total: 1609, vals: [121, 122, 92, 85, 186, 197, 208, 210, 218, 170] },
+          { name: "ECOGRAFÍA RENAL Y RETROPERITONEAL FOCALIZADA", area: "ULTRA", total: 1298, vals: [88, 97, 67, 76, 121, 133, 152, 182, 216, 166] },
+          { name: "COLUMNA VERTEBRAL LUMBOSACRAL 3 VISTAS", area: "RAD", total: 1175, vals: [103, 121, 141, 111, 162, 136, 112, 89, 93, 107] },
+          { name: "RX DE AMBAS RODILLAS ANTERO POSTERIOR", area: "RAD", total: 1079, vals: [86, 82, 118, 114, 150, 138, 117, 92, 99, 83] },
+          { name: "ECOGRAFIA DE PARTES BLANDAS REGION NO ESPECIFICADA", area: "ULTRA", total: 881, vals: [25, 40, 59, 59, 116, 138, 106, 114, 125, 99] }
+        ]
+      },
+      td2: {
+        categories: [
+          { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", vals: [1531, 1742, 1994, 1788, 1772, 1799, 1458, 1181, 1208, 1165] },
+          { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", vals: [252, 448, 307, 312, 980, 1182, 760, 901, 1173, 560] },
+          { name: "MAMOGRAFIA", area: "MAMO", vals: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
+        ],
+        topExams: [
+          { name: "RX DE TORAX; VISTA UNICA, POSTERO-ANTERIOR", area: "RAD", total: 1872, vals: [194, 208, 202, 228, 244, 227, 192, 134, 132, 111] },
+          { name: "ECOGRAFIA TRANSVAGINAL", area: "ULTRA", total: 1365, vals: [4, 13, 7, 46, 225, 244, 119, 212, 268, 227] },
+          { name: "ECOGRAFIA ABDOMINAL COMPLETA", area: "ULTRA", total: 1287, vals: [57, 84, 86, 54, 160, 263, 141, 190, 211, 41] },
+          { name: "COLUMNA VERTEBRAL LUMBOSACRAL 3 VISTAS", area: "RAD", total: 1053, vals: [103, 110, 132, 102, 146, 121, 89, 80, 78, 92] },
+          { name: "RX DE AMBAS RODILLAS ANTERO POSTERIOR", area: "RAD", total: 994, vals: [84, 80, 113, 103, 140, 118, 109, 87, 87, 73] },
+          { name: "RX COLUMNA LUMBO-SACRA F/P", area: "RAD", total: 725, vals: [78, 63, 108, 93, 55, 113, 101, 31, 50, 33] },
+          { name: "TORAX, DOS VISTAS, INCIDENCIA FRONTAL Y LATERAL", area: "RAD", total: 683, vals: [60, 159, 121, 121, 51, 63, 30, 25, 31, 22] },
+          { name: "COLUMNA VERTEBRAL CERVICAL 3 VISTAS", area: "RAD", total: 673, vals: [59, 51, 66, 97, 84, 91, 80, 47, 48, 50] },
+          { name: "RX DE HOMBRO DOS INCIDENCIAS", area: "RAD", total: 561, vals: [60, 62, 67, 52, 73, 70, 38, 42, 54, 43] },
+          { name: "ECOGRAFIA DE MAMAS BILATERAL/UNILATERAL", area: "ULTRA", total: 546, vals: [57, 52, 35, 25, 80, 99, 24, 40, 119, 15] }
+        ]
+      },
+      td3: {
+        categories: [
+          { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", vals: [831, 961, 1047, 1198, 1010, 1058, 913, 956, 1203, 1249] },
+          { name: "MAMOGRAFIA", area: "MAMO", vals: [235, 183, 240, 313, 322, 302, 236, 219, 297, 188] },
+          { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", vals: [36, 52, 112, 170, 245, 262, 224, 170, 219, 229] }
+        ],
+        topExams: [
+          { name: "MAMOGRAFIA DE TAMIZAJE BILATERAL", area: "MAMO", total: 2053, vals: [132, 138, 143, 251, 289, 242, 215, 191, 274, 178] },
+          { name: "ECOGRAFIA ABDOMINAL COMPLETA", area: "ULTRA", total: 1796, vals: [83, 110, 135, 219, 172, 162, 128, 140, 291, 356] },
+          { name: "ECOGRAFIA TRANSVAGINAL", area: "ULTRA", total: 1678, vals: [277, 308, 292, 327, 127, 141, 73, 46, 43, 44] },
+          { name: "ECOGRAFIA DE MAMAS BILATERAL/UNILATERAL", area: "ULTRA", total: 1388, vals: [86, 66, 89, 181, 160, 201, 152, 140, 172, 141] },
+          { name: "ECOGRAFIA SUPRAPUBICA PROSTATICA", area: "ULTRA", total: 1108, vals: [84, 75, 73, 73, 109, 111, 139, 152, 138, 154] },
+          { name: "ECOGRAFÍA RENAL Y RETROPERITONEAL", area: "ULTRA", total: 859, vals: [57, 44, 53, 59, 57, 62, 105, 125, 147, 150] },
+          { name: "ECOGRAFIA DE PARTES BLANDAS", area: "ULTRA", total: 489, vals: [15, 18, 31, 26, 61, 84, 61, 56, 64, 73] },
+          { name: "ECOGRAFIA VESICAL", area: "ULTRA", total: 427, vals: [26, 25, 32, 31, 27, 40, 42, 80, 71, 53] },
+          { name: "ECOGRAFIA ABDOMINAL COMPLETA SUPERIOR", area: "ULTRA", total: 329, vals: [3, 27, 27, 31, 43, 24, 28, 47, 50, 49] },
+          { name: "MAMOGRAFIA UNILATERAL", area: "MAMO", total: 328, vals: [78, 38, 86, 47, 13, 30, 11, 19, 6, 0] }
+        ]
+      },
+      td4: {
+        categories: [
+          { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", vals: [836, 1798, 718, 1243, 566, 524, 674, 613, 135, 152] },
+          { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", vals: [6, 613, 736, 339, 751, 889, 585, 717, 1098, 1011] },
+          { name: "MAMOGRAFIA", area: "MAMO", vals: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0] }
+        ],
+        subServices: [
+          { name: "RAYOS X", area: "RAD", vals: [639, 788, 472, 781, 378, 117, 201, 80, 135, 144] },
+          { name: "RX-HPERU", area: "RAD", vals: [195, 992, 226, 457, 85, 333, 399, 533, 0, 8] },
+          { name: "RX-HPERU2", area: "RAD", vals: [2, 18, 20, 5, 103, 74, 74, 0, 0, 0] },
+          { name: "ECOGRAFIA GINECOLOGICA", area: "ULTRA", vals: [0, 0, 0, 0, 0, 368, 68, 275, 428, 308] },
+          { name: "ECOGRAFIA GRLES", area: "ULTRA", vals: [6, 169, 235, 339, 288, 459, 431, 318, 549, 437] },
+          { name: "ECOGRAFIA TRAUMATOLOGICA", area: "ULTRA", vals: [0, 0, 0, 0, 0, 0, 12, 13, 19, 148] },
+          { name: "ECOGRAFIA UROLOGICA", area: "ULTRA", vals: [0, 0, 0, 0, 0, 42, 74, 111, 102, 82] },
+          { name: "ECOGRAFIA CAMPAÑA", area: "ULTRA", vals: [0, 444, 501, 0, 463, 20, 0, 0, 0, 36] },
+          { name: "MAMOGRAFIA (ESTUDIO)", area: "MAMO", vals: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0] }
+        ],
+        topDoctors: [
+          { name: "ESCOBEDO CAVA CARLOS CESAR", area: "RAD", vals: [693, 603, 379, 558, 434, 566, 550, 371, 685, 551] },
+          { name: "CARBAJAL CHUQUIRUNA GARY RANDY", area: "RAD", vals: [149, 751, 329, 705, 418, 404, 555, 560, 0, 38] },
+          { name: "MENDOZA RODRIGUEZ ALICE MARY", area: "ULTRA", vals: [0, 507, 498, 0, 464, 0, 0, 0, 0, 0] },
+          { name: "ARDILES ABANTO EDWIN JESÚS", area: "RAD", vals: [0, 0, 245, 319, 0, 0, 0, 0, 0, 0] },
+          { name: "RIVERA QUIROZ LUIS GERARDO", area: "ULTRA", vals: [0, 0, 0, 0, 0, 43, 74, 111, 102, 82] },
+          { name: "LAURENTE PALOMINO MAGNO", area: "RAD", vals: [0, 389, 0, 0, 0, 0, 0, 0, 0, 0] },
+          { name: "PLASENCIA SANTA MARIA VICTOR ERNESTO", area: "ULTRA", vals: [0, 0, 0, 0, 0, 193, 0, 59, 52, 56] },
+          { name: "TAPIA SILVA LUIS ALBERTO", area: "ULTRA", vals: [0, 0, 0, 0, 0, 60, 0, 83, 190, 0] },
+          { name: "MENDEZ TANDAYPAN MIRTHA", area: "ULTRA", vals: [0, 0, 0, 0, 0, 38, 17, 62, 59, 49] },
+          { name: "VILLAR TEJADA PEDRO VICTORIANO", area: "ULTRA", vals: [0, 0, 0, 0, 0, 57, 24, 33, 51, 51] }
+        ]
+      }
+    };
+
+    let activeTab = "consolidada";
+
+    function populateMonthSelect() {
+      const sel = document.getElementById("monthFilter");
+      const currentVal = sel.value;
+      sel.innerHTML = `<option value="ALL">Todo el Periodo (${MONTHS[0]} - ${MONTHS[MONTHS.length - 1]} 2026)</option>`;
+      MONTHS.forEach((m, idx) => {
+        const full = FULL_MONTH_NAMES[idx] || m;
+        sel.innerHTML += `<option value="${idx}">${full}</option>`;
+      });
+      if (currentVal !== "" && sel.querySelector(`option[value="${currentVal}"]`)) {
+        sel.value = currentVal;
+      } else {
+        sel.value = "ALL";
+      }
+    }
+
+    function init() {
+      populateMonthSelect();
+      applyFilters();
+    }
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      event.currentTarget.classList.add("active");
+
+      const chartSec = document.getElementById("chartSection");
+      if (tabId === "consolidada" || tabId === "origen") {
+        chartSec.style.display = "grid";
+      } else {
+        chartSec.style.display = "none";
+      }
+      renderTable();
+    }
+
+    function applyFilters() {
+      const mVal = document.getElementById("monthFilter").value;
+      const aVal = document.getElementById("areaFilter").value;
+      const oVal = document.getElementById("originFilter").value;
+
+      let v1 = 0, v2 = 0, v3 = 0, v4 = 0;
+      const mIdx = mVal === "ALL" ? -1 : parseInt(mVal);
+
+      if (oVal === "ALL") {
+        const rows1 = (aVal === "ALL") ? RAW_DATA.td1.rows : RAW_DATA.td1.rows.filter(r => r.area === aVal);
+        const cats2 = (aVal === "ALL") ? RAW_DATA.td2.categories : RAW_DATA.td2.categories.filter(c => c.area === aVal);
+        const cats3 = (aVal === "ALL") ? RAW_DATA.td3.categories : RAW_DATA.td3.categories.filter(c => c.area === aVal);
+        const cats4 = (aVal === "ALL") ? RAW_DATA.td4.categories : RAW_DATA.td4.categories.filter(c => c.area === aVal);
+
+        rows1.forEach(r => v1 += (mIdx === -1 ? r.vals.reduce((a,b)=>a+b, 0) : (r.vals[mIdx] || 0)));
+        cats2.forEach(c => v2 += (mIdx === -1 ? c.vals.reduce((a,b)=>a+b, 0) : (c.vals[mIdx] || 0)));
+        cats3.forEach(c => v3 += (mIdx === -1 ? c.vals.reduce((a,b)=>a+b, 0) : (c.vals[mIdx] || 0)));
+        cats4.forEach(c => v4 += (mIdx === -1 ? c.vals.reduce((a,b)=>a+b, 0) : (c.vals[mIdx] || 0)));
+      } else {
+        const oData = ORIGIN_MONTHLY_DB[oVal];
+        const mods = (aVal === "ALL") ? ["RAD", "ULTRA", "MAMO"] : [aVal];
+        mods.forEach(mod => {
+          if (oData && oData[mod]) {
+            if (mIdx === -1) {
+              v1 += oData[mod].solic.reduce((a,b)=>a+b, 0);
+              v2 += oData[mod].cita.reduce((a,b)=>a+b, 0);
+              v3 += oData[mod].sincita.reduce((a,b)=>a+b, 0);
+              v4 += oData[mod].resul.reduce((a,b)=>a+b, 0);
+            } else {
+              v1 += (oData[mod].solic[mIdx] || 0);
+              v2 += (oData[mod].cita[mIdx] || 0);
+              v3 += (oData[mod].sincita[mIdx] || 0);
+              v4 += (oData[mod].resul[mIdx] || 0);
+            }
+          }
+        });
+      }
+
+      document.getElementById("kpi1").innerText = v1.toLocaleString();
+      document.getElementById("kpi2").innerText = v2.toLocaleString();
+      document.getElementById("kpi3").innerText = v3.toLocaleString();
+      document.getElementById("kpi4").innerText = v4.toLocaleString();
+
+      const p2 = v1 > 0 ? ((v2 / v1) * 100).toFixed(1) : "0.0";
+      const p3 = v1 > 0 ? ((v3 / v1) * 100).toFixed(1) : "0.0";
+      const p4 = v1 > 0 ? ((v4 / v1) * 100).toFixed(1) : "0.0";
+
+      document.getElementById("kpi2Pct").innerText = p2 + "%";
+      document.getElementById("kpi3Pct").innerText = p3 + "%";
+      document.getElementById("kpi4Pct").innerText = p4 + "% Total";
+
+      renderBarChart();
+      renderDonutChart();
+      renderTable();
+    }
+
+    function renderBarChart() {
+      const box = document.getElementById("barChartBox");
+      const mVal = document.getElementById("monthFilter").value;
+      const aVal = document.getElementById("areaFilter").value;
+      const oVal = document.getElementById("originFilter").value;
+
+      const W = 720;
+      const H = 200;
+      const padL = 45;
+      const padB = 30;
+      const chartW = W - padL - 15;
+      const chartH = H - padB - 20;
+
+      const indices = mVal === "ALL" ? MONTHS.map((_, i) => i) : [parseInt(mVal)];
+
+      let getValsAtMonth = (mIdx) => {
+        let y1 = 0, y2 = 0, y3 = 0, y4 = 0;
+        if (oVal === "ALL") {
+          const rows1 = (aVal === "ALL") ? RAW_DATA.td1.rows : RAW_DATA.td1.rows.filter(r => r.area === aVal);
+          const cats2 = (aVal === "ALL") ? RAW_DATA.td2.categories : RAW_DATA.td2.categories.filter(c => c.area === aVal);
+          const cats3 = (aVal === "ALL") ? RAW_DATA.td3.categories : RAW_DATA.td3.categories.filter(c => c.area === aVal);
+          const cats4 = (aVal === "ALL") ? RAW_DATA.td4.categories : RAW_DATA.td4.categories.filter(c => c.area === aVal);
+
+          rows1.forEach(r => y1 += (r.vals[mIdx] || 0));
+          cats2.forEach(c => y2 += (c.vals[mIdx] || 0));
+          cats3.forEach(c => y3 += (c.vals[mIdx] || 0));
+          cats4.forEach(c => y4 += (c.vals[mIdx] || 0));
+        } else {
+          const oData = ORIGIN_MONTHLY_DB[oVal];
+          const mods = (aVal === "ALL") ? ["RAD", "ULTRA", "MAMO"] : [aVal];
+          mods.forEach(mod => {
+            if (oData && oData[mod]) {
+              y1 += (oData[mod].solic[mIdx] || 0);
+              y2 += (oData[mod].cita[mIdx] || 0);
+              y3 += (oData[mod].sincita[mIdx] || 0);
+              y4 += (oData[mod].resul[mIdx] || 0);
+            }
+          });
+        }
+        return [y1, y2, y3, y4];
+      };
+
+      let maxVal = 100;
+      indices.forEach(idx => {
+        const arr = getValsAtMonth(idx);
+        maxVal = Math.max(maxVal, ...arr);
+      });
+      maxVal = Math.ceil((maxVal * 1.15) / 100) * 100;
+
+      let svg = `<svg viewBox="0 0 ${W} ${H}">`;
+
+      for (let g = 0; g <= 4; g++) {
+        let yVal = Math.round((maxVal / 4) * g);
+        let yPos = H - padB - (yVal / maxVal) * chartH;
+        svg += `<line x1="${padL}" y1="${yPos}" x2="${W-10}" y2="${yPos}" stroke="#f1f5f9" stroke-width="1"/>`;
+        svg += `<text x="${padL - 6}" y="${yPos + 4}" font-size="10" fill="#94a3b8" text-anchor="end">${yVal >= 1000 ? (yVal/1000).toFixed(1)+'k' : yVal}</text>`;
+      }
+
+      const numGroups = indices.length;
+      const groupW = chartW / numGroups;
+      const barW = Math.max(4, (groupW * 0.7) / 4);
+
+      indices.forEach((mIdx, gIdx) => {
+        const groupX = padL + gIdx * groupW + groupW * 0.15;
+        const [y1, y2, y3, y4] = getValsAtMonth(mIdx);
+
+        const series = [
+          { val: y1, col: "#0284c7", label: "TD1. Total Generadas" },
+          { val: y2, col: "#16a34a", label: "TD2. Con Cita Asignada" },
+          { val: y3, col: "#dc2626", label: "TD3. Sin Cita (Embalse)" },
+          { val: y4, col: "#7c3aed", label: "TD4. Con Resultados" }
+        ];
+
+        series.forEach((item, bIdx) => {
+          const bH = maxVal > 0 ? (item.val / maxVal) * chartH : 0;
+          const bX = groupX + bIdx * (barW + 2);
+          const bY = H - padB - bH;
+          svg += `<rect x="${bX}" y="${bY}" width="${barW}" height="${bH}" fill="${item.col}" rx="2">
+                    <title>${MONTHS[mIdx]} - ${item.label}: ${item.val.toLocaleString()}</title>
+                  </rect>`;
+        });
+
+        svg += `<text x="${groupX + (barW * 4)/2}" y="${H - 10}" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">${MONTHS[mIdx]}</text>`;
+      });
+
+      svg += `</svg>`;
+      box.innerHTML = svg;
+
+      const titleTxt = oVal === "ALL" 
+        ? (aVal === "ALL" ? "Todas las Áreas y Modalidades" : aVal)
+        : `${oVal} (${aVal === "ALL" ? "Todas" : aVal})`;
+      document.getElementById("barChartSub").innerText = `${titleTxt} | Demanda vs Cita vs Embalse vs Resultados`;
+      document.getElementById("barPeriodBadge").innerText = `${MONTHS[0]} - ${MONTHS[MONTHS.length - 1]} 2026`;
+    }
+
+    function renderDonutChart() {
+      const svgBox = document.getElementById("donutSvg");
+      const mIdx = document.getElementById("monthFilter").value === "ALL" ? -1 : parseInt(document.getElementById("monthFilter").value);
+      const aVal = document.getElementById("areaFilter").value;
+      const oVal = document.getElementById("originFilter").value;
+
+      let r = 0, u = 0, m = 0;
+
+      if (oVal === "ALL") {
+        const rowR = RAW_DATA.td1.rows.find(x => x.area === "RAD");
+        const rowU = RAW_DATA.td1.rows.find(x => x.area === "ULTRA");
+        const rowM = RAW_DATA.td1.rows.find(x => x.area === "MAMO");
+
+        r = mIdx === -1 ? rowR.vals.reduce((a,b)=>a+b, 0) : (rowR.vals[mIdx] || 0);
+        u = mIdx === -1 ? rowU.vals.reduce((a,b)=>a+b, 0) : (rowU.vals[mIdx] || 0);
+        m = mIdx === -1 ? rowM.vals.reduce((a,b)=>a+b, 0) : (rowM.vals[mIdx] || 0);
+      } else {
+        const oData = ORIGIN_MONTHLY_DB[oVal];
+        if (oData) {
+          r = mIdx === -1 ? oData["RAD"].solic.reduce((a,b)=>a+b, 0) : (oData["RAD"].solic[mIdx] || 0);
+          u = mIdx === -1 ? oData["ULTRA"].solic.reduce((a,b)=>a+b, 0) : (oData["ULTRA"].solic[mIdx] || 0);
+          m = mIdx === -1 ? oData["MAMO"].solic.reduce((a,b)=>a+b, 0) : (oData["MAMO"].solic[mIdx] || 0);
+        }
+      }
+
+      if (aVal === "RAD") { u = 0; m = 0; }
+      else if (aVal === "ULTRA") { r = 0; m = 0; }
+      else if (aVal === "MAMO") { r = 0; u = 0; }
+
+      const total = r + u + m;
+      document.getElementById("donutTotal").innerText = total >= 1000 ? (total / 1000).toFixed(1) + "k" : total;
+      document.getElementById("donutLabel").innerText = oVal === "ALL" ? (aVal === "ALL" ? "Total" : aVal) : oVal.substring(0, 8);
+
+      const pR = total > 0 ? (r / total) * 100 : 0;
+      const pU = total > 0 ? (u / total) * 100 : 0;
+      const pM = total > 0 ? (m / total) * 100 : 0;
+
+      document.getElementById("legRad").innerText = r.toLocaleString();
+      document.getElementById("legUltra").innerText = u.toLocaleString();
+      document.getElementById("legMamo").innerText = m.toLocaleString();
+
+      document.getElementById("legRadPct").innerText = pR.toFixed(1) + "%";
+      document.getElementById("legUltraPct").innerText = pU.toFixed(1) + "%";
+      document.getElementById("legMamoPct").innerText = pM.toFixed(1) + "%";
+
+      document.getElementById("legItemRad").style.opacity = (aVal === "ALL" || aVal === "RAD") ? "1" : "0.3";
+      document.getElementById("legItemUltra").style.opacity = (aVal === "ALL" || aVal === "ULTRA") ? "1" : "0.3";
+      document.getElementById("legItemMamo").style.opacity = (aVal === "ALL" || aVal === "MAMO") ? "1" : "0.3";
+
+      const c = 2 * Math.PI * 36;
+      const offR = c * (1 - pR / 100);
+      const offU = c * (1 - pU / 100);
+      const offM = c * (1 - pM / 100);
+
+      const rotR = -90;
+      const rotU = rotR + (pR * 3.6);
+      const rotM = rotU + (pU * 3.6);
+
+      let svg = ``;
+      if (pR > 0) {
+        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#0284c7" stroke-width="14"
+          stroke-dasharray="${c}" stroke-dashoffset="${offR}" transform="rotate(${rotR} 50 50)"/>`;
+      }
+      if (pU > 0) {
+        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#10b981" stroke-width="14"
+          stroke-dasharray="${c}" stroke-dashoffset="${offU}" transform="rotate(${rotU} 50 50)"/>`;
+      }
+      if (pM > 0) {
+        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#f59e0b" stroke-width="14"
+          stroke-dasharray="${c}" stroke-dashoffset="${offM}" transform="rotate(${rotM} 50 50)"/>`;
+      }
+      if (total === 0) {
+        svg += `<circle cx="50" cy="50" r="36" fill="transparent" stroke="#e2e8f0" stroke-width="14"/>`;
+      }
+
+      svgBox.innerHTML = svg;
+    }
+
+    function renderTable() {
+      const container = document.getElementById("tableContainer");
+      const title = document.getElementById("tableCardTitle");
+      const meta = document.getElementById("tableMetaInfo");
+      const aVal = document.getElementById("areaFilter").value;
+      const mVal = document.getElementById("monthFilter").value;
+      const oVal = document.getElementById("originFilter").value;
+
+      const mesTxt = mVal === "ALL" ? `${MONTHS[0]} a ${MONTHS[MONTHS.length - 1]} 2026` : FULL_MONTH_NAMES[parseInt(mVal)];
+      const origTxt = oVal === "ALL" ? "Todas las Áreas" : oVal;
+
+      if (activeTab === "consolidada") {
+        title.innerText = "📑 MATRIZ CONSOLIDADA DE LAS 4 TABLAS DINÁMICAS";
+        meta.innerText = `Filtros: ${origTxt} | Periodo: ${mesTxt}`;
+        container.innerHTML = getConsolidatedHTML(aVal, mVal, oVal);
+      } else if (activeTab === "origen") {
+        title.innerText = "🏥 MATRIZ ASISTENCIAL POR ÁREA DE ORIGEN (CONSULTA EXTERNA, EMERGENCIA, HOSPITALIZACIÓN, CENTRO QUIRÚRGICO)";
+        meta.innerText = `Periodo: ${mesTxt}`;
+        container.innerHTML = getOriginMatrixHTML(mVal);
+      } else if (activeTab === "td1") {
+        title.innerText = "📋 TD1: TOTAL DE SOLICITUDES GENERADAS";
+        meta.innerText = `Hoja: TOTAL DE SOLICITUDESGENERADAS | Filtro: ${origTxt}`;
+        container.innerHTML = getTD1HTML(aVal, mVal, oVal);
+      } else if (activeTab === "td2") {
+        title.innerText = "📅 TD2: SOLICITUDES CON CITA";
+        meta.innerText = `Hoja: SOLICITUDES CON CITA | Filtro: ${origTxt}`;
+        container.innerHTML = getTD2HTML(aVal, mVal, oVal);
+      } else if (activeTab === "td3") {
+        title.innerText = "⏳ TD3: SOLICITUDES SIN CITAS (DEMANDA EMBALSADA)";
+        meta.innerText = `Hoja: SOLICITUDES SIN CITAS | Filtro: ${origTxt}`;
+        container.innerHTML = getTD3HTML(aVal, mVal, oVal);
+      } else if (activeTab === "td4") {
+        title.innerText = "🩺 TD4: IMÁGENES CON RESULTADOS";
+        meta.innerText = `Hoja: IMAEGENES CON RESULTADOS | Filtro: ${origTxt}`;
+        container.innerHTML = getTD4HTML(aVal, mVal, oVal);
+      }
+    }
+
+    function getConsolidatedHTML(area, month, origin) {
+      const mIdx = month === "ALL" ? -1 : parseInt(month);
+
+      let rows = [
+        { name: "🔵 RADIOLOGIA DIAGNOSTICA", area: "RAD" },
+        { name: "🟢 ULTRASONIDO DIAGNOSTICO", area: "ULTRA" },
+        { name: "🟡 MAMOGRAFIA", area: "MAMO" }
+      ];
+
+      const filteredRows = (area === "ALL") ? rows : rows.filter(r => r.area === area);
+
+      let sumT1 = 0, sumT2 = 0, sumT3 = 0, sumT4 = 0;
+      let tbody = "";
+
+      filteredRows.forEach(r => {
+        let v1 = 0, v2 = 0, v3 = 0, v4 = 0;
+
+        if (origin === "ALL") {
+          const row1 = RAW_DATA.td1.rows.find(x => x.area === r.area);
+          const cat2 = RAW_DATA.td2.categories.find(x => x.area === r.area);
+          const cat3 = RAW_DATA.td3.categories.find(x => x.area === r.area);
+          const cat4 = RAW_DATA.td4.categories.find(x => x.area === r.area);
+
+          if (mIdx === -1) {
+            v1 = row1 ? row1.vals.reduce((a,b)=>a+b, 0) : 0;
+            v2 = cat2 ? cat2.vals.reduce((a,b)=>a+b, 0) : 0;
+            v3 = cat3 ? cat3.vals.reduce((a,b)=>a+b, 0) : 0;
+            v4 = cat4 ? cat4.vals.reduce((a,b)=>a+b, 0) : 0;
+          } else {
+            v1 = row1 ? (row1.vals[mIdx] || 0) : 0;
+            v2 = cat2 ? (cat2.vals[mIdx] || 0) : 0;
+            v3 = cat3 ? (cat3.vals[mIdx] || 0) : 0;
+            v4 = cat4 ? (cat4.vals[mIdx] || 0) : 0;
+          }
+        } else {
+          const oData = ORIGIN_MONTHLY_DB[origin];
+          if (oData && oData[r.area]) {
+            if (mIdx === -1) {
+              v1 = oData[r.area].solic.reduce((a,b)=>a+b, 0);
+              v2 = oData[r.area].cita.reduce((a,b)=>a+b, 0);
+              v3 = oData[r.area].sincita.reduce((a,b)=>a+b, 0);
+              v4 = oData[r.area].resul.reduce((a,b)=>a+b, 0);
+            } else {
+              v1 = oData[r.area].solic[mIdx] || 0;
+              v2 = oData[r.area].cita[mIdx] || 0;
+              v3 = oData[r.area].sincita[mIdx] || 0;
+              v4 = oData[r.area].resul[mIdx] || 0;
+            }
+          }
+        }
+
+        sumT1 += v1; sumT2 += v2; sumT3 += v3; sumT4 += v4;
+
+        let pAsig = v1 > 0 ? ((v2 / v1) * 100).toFixed(1) + "%" : "0.0%";
+        let pEmb = v1 > 0 ? ((v3 / v1) * 100).toFixed(1) + "%" : "0.0%";
+        let pCob = v1 > 0 ? ((v4 / v1) * 100).toFixed(1) + "%" : "0.0%";
+
+        tbody += `
+          <tr>
+            <td><strong>${r.name}</strong></td>
+            <td class="num">${v1.toLocaleString()}</td>
+            <td class="num" style="color:var(--success); font-weight:700;">${v2.toLocaleString()}</td>
+            <td class="num">${pAsig}</td>
+            <td class="num" style="color:var(--danger); font-weight:700;">${v3.toLocaleString()}</td>
+            <td class="num">${pEmb}</td>
+            <td class="num" style="color:var(--purple); font-weight:700;">${v4.toLocaleString()}</td>
+            <td class="num">${pCob}</td>
+          </tr>
+        `;
+      });
+
+      let grandPAsig = sumT1 > 0 ? ((sumT2 / sumT1) * 100).toFixed(1) + "%" : "0.0%";
+      let grandPEmb = sumT1 > 0 ? ((sumT3 / sumT1) * 100).toFixed(1) + "%" : "0.0%";
+      let grandPCob = sumT1 > 0 ? ((sumT4 / sumT1) * 100).toFixed(1) + "%" : "0.0%";
+
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th>Área / Modalidad Diagnóstica</th>
+              <th class="num">TD1. Total Generadas</th>
+              <th class="num">TD2. Con Cita</th>
+              <th class="num">% Asignación</th>
+              <th class="num">TD3. Sin Cita (Embalse)</th>
+              <th class="num">% Embalse</th>
+              <th class="num">TD4. Con Resultados</th>
+              <th class="num">% Cobertura</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tbody}
+            <tr class="grand-total">
+              <td>Total General Seleccionado</td>
+              <td class="num">${sumT1.toLocaleString()}</td>
+              <td class="num">${sumT2.toLocaleString()}</td>
+              <td class="num">${grandPAsig}</td>
+              <td class="num">${sumT3.toLocaleString()}</td>
+              <td class="num">${grandPEmb}</td>
+              <td class="num">${sumT4.toLocaleString()}</td>
+              <td class="num">${grandPCob}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function getOriginMatrixHTML(month) {
+      const mIdx = month === "ALL" ? -1 : parseInt(month);
+      const areaKeys = Object.keys(ORIGIN_MONTHLY_DB);
+
+      let tbody = "";
+      let s1 = 0, s2 = 0, s3 = 0, s4 = 0;
+
+      areaKeys.forEach(k => {
+        const o = ORIGIN_MONTHLY_DB[k];
+        let v1 = 0, v2 = 0, v3 = 0, v4 = 0;
+        let r1 = 0, r2 = 0, r3 = 0, r4 = 0;
+        let u1 = 0, u2 = 0, u3 = 0, u4 = 0;
+        let m1 = 0, m2 = 0, m3 = 0, m4 = 0;
+
+        ["RAD", "ULTRA", "MAMO"].forEach(mod => {
+          let sol = mIdx === -1 ? o[mod].solic.reduce((a,b)=>a+b, 0) : (o[mod].solic[mIdx] || 0);
+          let cit = mIdx === -1 ? o[mod].cita.reduce((a,b)=>a+b, 0) : (o[mod].cita[mIdx] || 0);
+          let sin = mIdx === -1 ? o[mod].sincita.reduce((a,b)=>a+b, 0) : (o[mod].sincita[mIdx] || 0);
+          let res = mIdx === -1 ? o[mod].resul.reduce((a,b)=>a+b, 0) : (o[mod].resul[mIdx] || 0);
+
+          v1 += sol; v2 += cit; v3 += sin; v4 += res;
+          if (mod === "RAD") { r1 = sol; r2 = cit; r3 = sin; r4 = res; }
+          if (mod === "ULTRA") { u1 = sol; u2 = cit; u3 = sin; u4 = res; }
+          if (mod === "MAMO") { m1 = sol; m2 = cit; m3 = sin; m4 = res; }
+        });
+
+        s1 += v1; s2 += v2; s3 += v3; s4 += v4;
+
+        tbody += `
+          <tr class="bold-row">
+            <td><strong>🏥 ${k}</strong></td>
+            <td class="num">${v1.toLocaleString()}</td>
+            <td class="num" style="color:var(--success); font-weight:700;">${v2.toLocaleString()}</td>
+            <td class="num">${v1 > 0 ? ((v2/v1)*100).toFixed(1) : 0}%</td>
+            <td class="num" style="color:var(--danger); font-weight:700;">${v3.toLocaleString()}</td>
+            <td class="num">${v1 > 0 ? ((v3/v1)*100).toFixed(1) : 0}%</td>
+            <td class="num" style="color:var(--purple); font-weight:700;">${v4.toLocaleString()}</td>
+            <td class="num">${v1 > 0 ? ((v4/v1)*100).toFixed(1) : 0}%</td>
+          </tr>
+          <tr class="sub-item">
+            <td>↳ Radiología Diagnóstica</td>
+            <td class="num">${r1.toLocaleString()}</td>
+            <td class="num">${r2.toLocaleString()}</td>
+            <td class="num">${r1 > 0 ? ((r2/r1)*100).toFixed(1) : 0}%</td>
+            <td class="num">${r3.toLocaleString()}</td>
+            <td class="num">${r1 > 0 ? ((r3/r1)*100).toFixed(1) : 0}%</td>
+            <td class="num">${r4.toLocaleString()}</td>
+            <td class="num">${r1 > 0 ? ((r4/r1)*100).toFixed(1) : 0}%</td>
+          </tr>
+          <tr class="sub-item">
+            <td>↳ Ultrasonido Diagnóstico</td>
+            <td class="num">${u1.toLocaleString()}</td>
+            <td class="num">${u2.toLocaleString()}</td>
+            <td class="num">${u1 > 0 ? ((u2/u1)*100).toFixed(1) : 0}%</td>
+            <td class="num">${u3.toLocaleString()}</td>
+            <td class="num">${u1 > 0 ? ((u3/u1)*100).toFixed(1) : 0}%</td>
+            <td class="num">${u4.toLocaleString()}</td>
+            <td class="num">${u1 > 0 ? ((u4/u1)*100).toFixed(1) : 0}%</td>
+          </tr>
+          <tr class="sub-item">
+            <td>↳ Mamografía</td>
+            <td class="num">${m1.toLocaleString()}</td>
+            <td class="num">${m2.toLocaleString()}</td>
+            <td class="num">${m1 > 0 ? ((m2/m1)*100).toFixed(1) : 0}%</td>
+            <td class="num">${m3.toLocaleString()}</td>
+            <td class="num">${m1 > 0 ? ((m3/m1)*100).toFixed(1) : 0}%</td>
+            <td class="num">${m4.toLocaleString()}</td>
+            <td class="num">${m1 > 0 ? ((m4/m1)*100).toFixed(1) : 0}%</td>
+          </tr>
+        `;
+      });
+
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th>Área Asistencial de Origen</th>
+              <th class="num">Solicitudes Totales</th>
+              <th class="num">Con Cita</th>
+              <th class="num">% Oportunidad</th>
+              <th class="num">Sin Cita (Embalse)</th>
+              <th class="num">% Embalse</th>
+              <th class="num">Resultados Firmados</th>
+              <th class="num">% Cobertura</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tbody}
+            <tr class="grand-total">
+              <td>Total General Asistencial</td>
+              <td class="num">${s1.toLocaleString()}</td>
+              <td class="num">${s2.toLocaleString()}</td>
+              <td class="num">${s1 > 0 ? ((s2/s1)*100).toFixed(1) : 0}%</td>
+              <td class="num">${s3.toLocaleString()}</td>
+              <td class="num">${s1 > 0 ? ((s3/s1)*100).toFixed(1) : 0}%</td>
+              <td class="num">${s4.toLocaleString()}</td>
+              <td class="num">${s1 > 0 ? ((s4/s1)*100).toFixed(1) : 0}%</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function getTD1HTML(area, month, origin) {
+      let filteredRows = area === "ALL" ? RAW_DATA.td1.rows : RAW_DATA.td1.rows.filter(r => r.area === area);
+      let filteredExams = area === "ALL" ? RAW_DATA.td1.topExams : RAW_DATA.td1.topExams.filter(e => e.area === area);
+      const mIdx = month === "ALL" ? -1 : parseInt(month);
+      const cols = mIdx === -1 ? MONTHS : [MONTHS[mIdx]];
+
+      let h = `<table><thead><tr><th>Etiquetas de fila (TD1: Solicitudes Generadas)</th>`;
+      cols.forEach(m => h += `<th class="num">${m}</th>`);
+      h += `<th class="num">Total general</th></tr></thead><tbody>`;
+
+      let sumCols = new Array(cols.length).fill(0);
+      let grandTotalSum = 0;
+
+      filteredRows.forEach(r => {
+        h += `<tr><td><strong>${r.name}</strong></td>`;
+        if (mIdx === -1) {
+          r.vals.forEach((v, i) => {
+            h += `<td class="num">${v.toLocaleString()}</td>`;
+            sumCols[i] += v;
+          });
+          const tot = r.vals.reduce((a,b)=>a+b, 0);
+          h += `<td class="num" style="font-weight:700;">${tot.toLocaleString()}</td></tr>`;
+          grandTotalSum += tot;
+        } else {
+          let v = r.vals[mIdx] || 0;
+          sumCols[0] += v;
+          grandTotalSum += v;
+          h += `<td class="num">${v.toLocaleString()}</td><td class="num" style="font-weight:700;">${v.toLocaleString()}</td></tr>`;
+        }
+      });
+
+      if (origin === "ALL" && filteredExams && filteredExams.length > 0) {
+        h += `<tr class="section-head"><td colspan="${cols.length + 2}">TOP 10 EXÁMENES MÁS SOLICITADOS (DEMANDA GENERAL)</td></tr>`;
+        filteredExams.forEach((e, idx) => {
+          h += `<tr class="sub-item"><td><strong>${idx + 1}.</strong> ${e.name}</td>`;
+          if (mIdx === -1) {
+            e.vals.forEach(v => h += `<td class="num">${v.toLocaleString()}</td>`);
+            const tot = e.vals.reduce((a,b)=>a+b, 0);
+            h += `<td class="num" style="font-weight:600;">${tot.toLocaleString()}</td></tr>`;
+          } else {
+            let v = e.vals[mIdx] || 0;
+            h += `<td class="num">${v.toLocaleString()}</td><td class="num" style="font-weight:600;">${v.toLocaleString()}</td></tr>`;
+          }
+        });
+      }
+
+      h += `<tr class="grand-total"><td>Total general</td>`;
+      sumCols.forEach(sc => h += `<td class="num">${sc.toLocaleString()}</td>`);
+      h += `<td class="num">${grandTotalSum.toLocaleString()}</td></tr></tbody></table>`;
+      return h;
+    }
+
+    function getTD2HTML(area, month, origin) {
+      let filteredCats = area === "ALL" ? RAW_DATA.td2.categories : RAW_DATA.td2.categories.filter(c => c.area === area);
+      let filteredExams = area === "ALL" ? RAW_DATA.td2.topExams : RAW_DATA.td2.topExams.filter(e => e.area === area);
+      const mIdx = month === "ALL" ? -1 : parseInt(month);
+      const cols = mIdx === -1 ? MONTHS : [MONTHS[mIdx]];
+
+      let h = `<table><thead><tr><th>Etiquetas de fila (TD2: Solicitudes con Cita)</th>`;
+      cols.forEach(m => h += `<th class="num">${m}</th>`);
+      h += `<th class="num">Total general</th></tr></thead><tbody>`;
+
+      let sumCols = new Array(cols.length).fill(0);
+      let grandTotalSum = 0;
+
+      filteredCats.forEach(c => {
+        h += `<tr class="bold-row"><td><strong>${c.name}</strong></td>`;
+        if (mIdx === -1) {
+          c.vals.forEach((v, i) => {
+            h += `<td class="num">${v.toLocaleString()}</td>`;
+            sumCols[i] += v;
+          });
+          const tot = c.vals.reduce((a,b)=>a+b, 0);
+          h += `<td class="num">${tot.toLocaleString()}</td></tr>`;
+          grandTotalSum += tot;
+        } else {
+          let v = c.vals[mIdx] || 0;
+          sumCols[0] += v;
+          grandTotalSum += v;
+          h += `<td class="num">${v.toLocaleString()}</td><td class="num">${v.toLocaleString()}</td></tr>`;
+        }
+      });
+
+      if (filteredExams && filteredExams.length > 0) {
+        h += `<tr class="section-head"><td colspan="${cols.length + 2}">TOP 10 EXÁMENES PRINCIPALES CON CITA ASIGNADA</td></tr>`;
+        filteredExams.forEach((e, idx) => {
+          h += `<tr class="sub-item"><td><strong>${idx + 1}.</strong> ${e.name}</td>`;
+          if (mIdx === -1) {
+            e.vals.forEach(v => h += `<td class="num">${v.toLocaleString()}</td>`);
+            const tot = e.vals.reduce((a,b)=>a+b, 0);
+            h += `<td class="num" style="font-weight:600;">${tot.toLocaleString()}</td></tr>`;
+          } else {
+            let v = e.vals[mIdx] || 0;
+            h += `<td class="num">${v.toLocaleString()}</td><td class="num" style="font-weight:600;">${v.toLocaleString()}</td></tr>`;
+          }
+        });
+      }
+
+      h += `<tr class="grand-total"><td>Total general</td>`;
+      sumCols.forEach(sc => h += `<td class="num">${sc.toLocaleString()}</td>`);
+      h += `<td class="num">${grandTotalSum.toLocaleString()}</td></tr></tbody></table>`;
+      return h;
+    }
+
+    function getTD3HTML(area, month, origin) {
+      let filteredCats = area === "ALL" ? RAW_DATA.td3.categories : RAW_DATA.td3.categories.filter(c => c.area === area);
+      let filteredExams = area === "ALL" ? RAW_DATA.td3.topExams : RAW_DATA.td3.topExams.filter(e => e.area === area);
+      const mIdx = month === "ALL" ? -1 : parseInt(month);
+      const cols = mIdx === -1 ? MONTHS : [MONTHS[mIdx]];
+
+      let h = `<table><thead><tr><th>Etiquetas de fila (TD3: Demanda Embalsada sin Cita)</th>`;
+      cols.forEach(m => h += `<th class="num">${m}</th>`);
+      h += `<th class="num">Total general</th></tr></thead><tbody>`;
+
+      let sumCols = new Array(cols.length).fill(0);
+      let grandTotalSum = 0;
+
+      filteredCats.forEach(c => {
+        h += `<tr class="bold-row"><td><strong>${c.name}</strong></td>`;
+        if (mIdx === -1) {
+          c.vals.forEach((v, i) => {
+            h += `<td class="num">${v.toLocaleString()}</td>`;
+            sumCols[i] += v;
+          });
+          const tot = c.vals.reduce((a,b)=>a+b, 0);
+          h += `<td class="num">${tot.toLocaleString()}</td></tr>`;
+          grandTotalSum += tot;
+        } else {
+          let v = c.vals[mIdx] || 0;
+          sumCols[0] += v;
+          grandTotalSum += v;
+          h += `<td class="num">${v.toLocaleString()}</td><td class="num">${v.toLocaleString()}</td></tr>`;
+        }
+      });
+
+      if (filteredExams && filteredExams.length > 0) {
+        h += `<tr class="section-head" style="background:#fee2e2; color:#991b1b;"><td colspan="${cols.length + 2}">TOP 10 CUELLOS DE BOTELLA CRÍTICOS EN DEMANDA EMBALSADA (SIN CITA)</td></tr>`;
+        filteredExams.forEach((e, idx) => {
+          h += `<tr class="sub-item"><td><strong>${idx + 1}.</strong> ${e.name}</td>`;
+          if (mIdx === -1) {
+            e.vals.forEach(v => h += `<td class="num">${v.toLocaleString()}</td>`);
+            const tot = e.vals.reduce((a,b)=>a+b, 0);
+            h += `<td class="num" style="font-weight:600;">${tot.toLocaleString()}</td></tr>`;
+          } else {
+            let v = e.vals[mIdx] || 0;
+            h += `<td class="num">${v.toLocaleString()}</td><td class="num" style="font-weight:600;">${v.toLocaleString()}</td></tr>`;
+          }
+        });
+      }
+
+      h += `<tr class="grand-total"><td>Total general</td>`;
+      sumCols.forEach(sc => h += `<td class="num">${sc.toLocaleString()}</td>`);
+      h += `<td class="num">${grandTotalSum.toLocaleString()}</td></tr></tbody></table>`;
+      return h;
+    }
+
+    function getTD4HTML(area, month, origin) {
+      let filteredCats = area === "ALL" ? RAW_DATA.td4.categories : RAW_DATA.td4.categories.filter(c => c.area === area);
+      const mIdx = month === "ALL" ? -1 : parseInt(month);
+      const cols = mIdx === -1 ? MONTHS : [MONTHS[mIdx]];
+
+      let h = `<table><thead><tr><th>Etiquetas de fila (TD4: Imágenes con Resultados)</th>`;
+      cols.forEach(m => h += `<th class="num">${m}</th>`);
+      h += `<th class="num">Total general</th></tr></thead><tbody>`;
+
+      let sumCols = new Array(cols.length).fill(0);
+      let grandTotalSum = 0;
+
+      filteredCats.forEach(c => {
+        h += `<tr class="bold-row" style="background:#f3e8ff; color:#581c87;"><td><strong>${c.name}</strong></td>`;
+        if (mIdx === -1) {
+          c.vals.forEach((v, i) => {
+            h += `<td class="num">${v.toLocaleString()}</td>`;
+            sumCols[i] += v;
+          });
+          const tot = c.vals.reduce((a,b)=>a+b, 0);
+          h += `<td class="num">${tot.toLocaleString()}</td></tr>`;
+          grandTotalSum += tot;
+        } else {
+          let v = c.vals[mIdx] || 0;
+          sumCols[0] += v;
+          grandTotalSum += v;
+          h += `<td class="num">${v.toLocaleString()}</td><td class="num">${v.toLocaleString()}</td></tr>`;
+        }
+      });
+
+      if (RAW_DATA.td4.subServices && RAW_DATA.td4.subServices.length > 0) {
+        h += `<tr class="section-head"><td colspan="${cols.length + 2}">DESGLOSE COMPLETO POR SEDES Y ESPECIALIDADES (UROLOGÍA, TRAUMATOLOGÍA, GINECOLOGÍA, GENERALES, CAMPAÑA)</td></tr>`;
+        RAW_DATA.td4.subServices.forEach(s => {
+          h += `<tr class="sub-item"><td><strong>${s.name}</strong></td>`;
+          if (mIdx === -1) {
+            s.vals.forEach(v => h += `<td class="num">${v ? v.toLocaleString() : '-'}</td>`);
+            const tot = s.vals.reduce((a,b)=>a+b, 0);
+            h += `<td class="num" style="font-weight:700;">${tot.toLocaleString()}</td></tr>`;
+          } else {
+            let v = s.vals[mIdx] || 0;
+            h += `<td class="num">${v ? v.toLocaleString() : '-'}</td><td class="num" style="font-weight:700;">${v ? v.toLocaleString() : '-'}</td></tr>`;
+          }
+        });
+      }
+
+      if (RAW_DATA.td4.topDoctors && RAW_DATA.td4.topDoctors.length > 0) {
+        h += `<tr class="section-head"><td colspan="${cols.length + 2}">TOP 10 MÉDICOS RADIÓLOGOS POR PRODUCCIÓN EN INFORMES</td></tr>`;
+        RAW_DATA.td4.topDoctors.forEach((d, idx) => {
+          h += `<tr class="sub-item"><td><strong>${idx + 1}.</strong> ${d.name}</td>`;
+          if (mIdx === -1) {
+            d.vals.forEach(v => h += `<td class="num">${v ? v.toLocaleString() : '-'}</td>`);
+            const tot = d.vals.reduce((a,b)=>a+b, 0);
+            h += `<td class="num" style="font-weight:600;">${tot.toLocaleString()}</td></tr>`;
+          } else {
+            let v = d.vals[mIdx] || 0;
+            h += `<td class="num">${v ? v.toLocaleString() : '-'}</td><td class="num" style="font-weight:600;">${v ? v.toLocaleString() : '-'}</td></tr>`;
+          }
+        });
+      }
+
+      h += `<tr class="grand-total"><td>Total general</td>`;
+      sumCols.forEach(sc => h += `<td class="num">${sc.toLocaleString()}</td>`);
+      h += `<td class="num">${grandTotalSum.toLocaleString()}</td></tr></tbody></table>`;
+      return h;
+    }
+
+    function openUploadModal() { document.getElementById("uploadModal").style.display = "flex"; }
+    function closeUploadModal() { document.getElementById("uploadModal").style.display = "none"; }
+    function resetToOfficial() {
+      document.getElementById("monthFilter").value = "ALL";
+      document.getElementById("areaFilter").value = "ALL";
+      document.getElementById("originFilter").value = "ALL";
+      applyFilters();
+    }
+
+    function handleExcelUpload(e, fileNum) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const r = new FileReader();
+      r.onload = function(evt) {
+        const data = new Uint8Array(evt.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        
+        if (fileNum === 1) {
+          document.getElementById("f1Name").innerHTML = `✅ <strong>${file.name}</strong> cargado`;
+          if (wb.Sheets['TOTAL DE SOLICITUDESGENERADAS']) {
+            const sheet = wb.Sheets['TOTAL DE SOLICITUDESGENERADAS'];
+            const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            for (let i = 0; i < Math.min(10, json.length); i++) {
+              const row = json[i];
+              if (row && (row[0] === "Etiquetas de fila" || row.includes("Ene"))) {
+                let detectedMonths = [];
+                for (let j = 1; j < row.length; j++) {
+                  let val = String(row[j] || "").trim();
+                  if (val && !val.toLowerCase().includes("total")) {
+                    detectedMonths.push(val);
+                  }
+                }
+                if (detectedMonths.length >= 10) {
+                  MONTHS = detectedMonths;
+                  populateMonthSelect();
+                }
+                break;
+              }
+            }
+          }
+        } else {
+          document.getElementById("f2Name").innerHTML = `✅ <strong>${file.name}</strong> cargado`;
+        }
+
+        applyFilters();
+        alert(`Archivo ${file.name} procesado y sincronizado.`);
+      };
+      r.readAsArrayBuffer(file);
+    }
+
+    // GENERADOR AUTOMÁTICO DE index.html LIMPIO PARA GITHUB
+    function generateGitHubHTML() {
+      // Clona el documento actual y remueve los botones/modales de carga
+      let cleanDoc = document.documentElement.cloneNode(true);
+      
+      // Remover modal de carga
+      let modal = cleanDoc.querySelector("#uploadModal");
+      if (modal) modal.remove();
+
+      // Ajustar header: quitar botón de cargar excels y botón de exportar github
+      let headerBtns = cleanDoc.querySelector(".header-btns");
+      if (headerBtns) {
+        headerBtns.innerHTML = `
+          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; background:#1e293b; color:#38bdf8; padding:6px 12px; border-radius:20px; border:1px solid #334155;">
+            <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
+            <span>Producción GitHub Pages</span>
+          </div>
+          <button class="btn btn-outline" onclick="resetToOfficial()">↺ Restablecer</button>
+        `;
+      }
+
+      // Remover referencia de carga en scripts
+      let htmlString = "<!DOCTYPE html>\n" + cleanDoc.outerHTML;
+
+      // Descargar como index.html
+      const blob = new Blob([htmlString], { type: "text/html;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "index.html";
+      link.click();
+
+      alert("¡Se ha generado y descargado tu archivo 'index.html'!\n\nEste archivo está 100% limpio y listo para copiar o subir directamente a tu repositorio de GitHub Pages.");
+    }
+
+    window.onload = init;
+  </script>
+
+</body></html>
