@@ -192,7 +192,7 @@
     }
     td { padding: 10px 16px; border-bottom: 1px solid #eaf1f6; white-space: nowrap; }
     tr:hover td { background-color: var(--essalud-cyan-light); }
-    .num { text-align: right; font-variant-numeric: tabular-nums; font-family: "SF Mono", Consolas, monospace; font-size: 12px; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; font-family: "SF Mono", Consolas, Monaco, monospace; font-size: 12px; }
     .bold-row td { font-weight: 800; background: #f8fbfd; color: var(--essalud-navy); }
     .section-head td {
       background: linear-gradient(90deg, #e3f2fd 0%, #f0f7fc 100%);
@@ -232,6 +232,33 @@
   </style>
 </head>
 <body>
+  <!-- PANTALLA DE INICIO DE SESIÓN ESSALUD IMAGENOLOGÍA -->
+  <div id="authLoginOverlay" style="position:fixed; inset:0; background:linear-gradient(135deg, #001c33 0%, #002b49 60%, #004578 100%); z-index:99999; display:flex; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#ffffff; border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.45); border:2px solid #00a0df; max-width:410px; width:100%; overflow:hidden;">
+      <div style="background:linear-gradient(135deg, #00223d 0%, #005696 100%); padding:26px 24px; text-align:center; color:#ffffff; border-bottom:3px solid #00a0df;">
+        <div style="width:56px; height:56px; border-radius:14px; background:#ffffff; color:#002b49; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:28px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">🏥</div>
+        <h2 style="font-size:19px; font-weight:900; letter-spacing:0.3px; margin:0;">SISTEMA DE IMAGENOLOGÍA</h2>
+        <p style="font-size:12px; color:#b9d8eb; margin-top:5px; font-weight:600;">EsSalud • Hospital I Albrecht — La Libertad</p>
+      </div>
+      <form onsubmit="validarAccesoImagenologia(event)" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+        <div>
+          <label style="display:block; font-size:11.5px; font-weight:800; color:#002b49; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Usuario (DNI)</label>
+          <input type="text" id="loginDniInput" maxlength="8" required="" placeholder="Ingrese su DNI (8 dígitos)" style="width:100%; padding:11px 14px; background:#f4f8fb; border:1.5px solid #d4e3ee; border-radius:10px; font-size:14px; font-weight:700; color:#0a1f33; outline:none;">
+        </div>
+        <div>
+          <label style="display:block; font-size:11.5px; font-weight:800; color:#002b49; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Contraseña</label>
+          <input type="password" id="loginPassInput" maxlength="8" required="" placeholder="Ingrese su contraseña" style="width:100%; padding:11px 14px; background:#f4f8fb; border:1.5px solid #d4e3ee; border-radius:10px; font-size:14px; font-weight:700; color:#0a1f33; outline:none;">
+        </div>
+        <div id="loginErrorMsg" style="display:none; padding:10px; border-radius:8px; background:#fde8e8; border:1px solid #f8b4b4; color:#cf222e; font-size:12px; font-weight:700; text-align:center;">
+          Usuario o contraseña incorrectos. Verifique su DNI.
+        </div>
+        <button type="submit" style="width:100%; padding:13px; background:linear-gradient(135deg, #002b49 0%, #005696 100%); color:#ffffff; border:none; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(0,86,150,0.3);">
+          🔒 Ingresar al Sistema
+        </button>
+      </form>
+    </div>
+  </div>
+
 
   <header>
     <div class="brand">
@@ -242,20 +269,21 @@
       </div>
     </div>
     <div class="header-btns">
-          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; background:rgba(255,255,255,0.15); color:#ffffff; padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.3);">
-            <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
-            <span>Producción GitHub Pages</span>
+            <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; background:rgba(255,255,255,0.15); color:#ffffff; padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.3);">
+              <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
+              <span>Producción GitHub Pages</span>
+            </div>
+            <button class="btn btn-outline" onclick="resetToOfficial()">↺ Restablecer</button>
+            <button class="btn" style="background:#cf222e; color:#ffffff;" onclick="sessionStorage.removeItem('essalud_img_albrecht_auth_v1'); location.reload();">Cerrar Sesión</button>
           </div>
-          <button class="btn btn-outline" onclick="resetToOfficial()">↺ Restablecer</button>
-        </div>
   </header>
 
   <nav class="nav-tabs">
-    <button class="tab-btn" onclick="switchTab('consolidada')">📊 Vista Consolidada</button>
+    <button class="tab-btn active" onclick="switchTab('consolidada')">📊 Vista Consolidada</button>
     <button class="tab-btn" onclick="switchTab('origen')">🏥 Distribución por Área Asistencial</button>
     <button class="tab-btn" onclick="switchTab('td1')">📋 1. Solicitudes Generadas (TD1)</button>
     <button class="tab-btn" onclick="switchTab('td2')">📅 2. Solicitudes con Cita (TD2)</button>
-    <button class="tab-btn active" onclick="switchTab('ipress')">🏥 Solicitudes Citadas por IPRESS</button>
+    <button class="tab-btn" onclick="switchTab('ipress')">🏥 Solicitudes Citadas por IPRESS</button>
     <button class="tab-btn" onclick="switchTab('toma')">📸 3. Toma de Rayos X (Tecnólogos)</button>
     <button class="tab-btn" onclick="switchTab('td3')">⏳ 4. Solicitudes sin Cita (TD3)</button>
     <button class="tab-btn" onclick="switchTab('td4')">🩺 5. Imágenes con Resultados (TD4)</button>
@@ -283,7 +311,7 @@
           <option value="MAMO">Mamografía</option>
         </select>
 
-        <select id="ipressFilter" onchange="applyFilters()" style="display: inline-block;">
+        <select id="ipressFilter" onchange="applyFilters()" style="display:none;">
           <option value="ALL">Todas las IPRESS</option>
           <option value="H.I ALBRECHT">H.I ALBRECHT</option>
           <option value="CAP III MET.TRUJILLO">CAP III MET.TRUJILLO</option>
@@ -300,10 +328,10 @@
     <div class="kpi-grid">
       <div class="kpi-card blue">
         <div class="kpi-header">
-          <span class="kpi-title" id="kpi1Title">CITAS EN IPRESS</span>
+          <span class="kpi-title" id="kpi1Title">TD1. Generadas (Demanda)</span>
           <div class="kpi-icon">📋</div>
         </div>
-        <div class="kpi-val" id="kpi1">22.513</div>
+        <div class="kpi-val" id="kpi1">37.595</div>
         <div class="kpi-foot">
           <span>TOTAL DE SOLICITUDES</span>
           <span class="badge-pill blue">100%</span>
@@ -312,37 +340,37 @@
 
       <div class="kpi-card green">
         <div class="kpi-header">
-          <span class="kpi-title" id="kpi2Title">H.I ALBRECHT</span>
+          <span class="kpi-title" id="kpi2Title">TD2. Con Cita Asignada</span>
           <div class="kpi-icon">📅</div>
         </div>
-        <div class="kpi-val" id="kpi2">17.829</div>
+        <div class="kpi-val" id="kpi2">22.514</div>
         <div class="kpi-foot">
           <span>ÓRDENES PROGRAMADAS</span>
-          <span class="badge-pill green" id="kpi2Pct">79.2%</span>
+          <span class="badge-pill green" id="kpi2Pct">59.9%</span>
         </div>
       </div>
 
       <div class="kpi-card red">
         <div class="kpi-header">
-          <span class="kpi-title" id="kpi3Title">CAP III MET.TRUJILLO</span>
+          <span class="kpi-title" id="kpi3Title">TD3. Sin Cita (Embalse)</span>
           <div class="kpi-icon">⏳</div>
         </div>
-        <div class="kpi-val" id="kpi3">4001</div>
+        <div class="kpi-val" id="kpi3">14.680</div>
         <div class="kpi-foot">
           <span>DEMANDA PENDIENTE</span>
-          <span class="badge-pill red" id="kpi3Pct">17.8%</span>
+          <span class="badge-pill red" id="kpi3Pct">39.0%</span>
         </div>
       </div>
 
       <div class="kpi-card purple">
         <div class="kpi-header">
-          <span class="kpi-title" id="kpi4Title">C.M. HUANCHACO</span>
+          <span class="kpi-title" id="kpi4Title">TD4. Resultados Listos</span>
           <div class="kpi-icon">🩺</div>
         </div>
-        <div class="kpi-val" id="kpi4">677</div>
+        <div class="kpi-val" id="kpi4">14.006</div>
         <div class="kpi-foot">
           <span>INFORMES EMITIDOS</span>
-          <span class="badge-pill purple" id="kpi4Pct">3.0% Total</span>
+          <span class="badge-pill purple" id="kpi4Pct">37.3% Total</span>
         </div>
       </div>
     </div>
@@ -352,108 +380,121 @@
       <div class="panel">
         <div class="panel-head">
           <div>
-            <div class="panel-title" id="chartLeftTitle">Citas Asignadas por IPRESS (Todas las Áreas)</div>
-            <div class="panel-sub" id="chartLeftSub">Demanda de pacientes citados según establecimiento de adscripción</div>
+            <div class="panel-title" id="chartLeftTitle">Evolución Cronológica de las 4 Tablas Dinámicas</div>
+            <div class="panel-sub" id="chartLeftSub">Demanda Total vs Citas Otorgadas vs Sin Cita vs Informes Emitidos</div>
           </div>
           <span class="badge-pill blue" id="chartBadge">Ene - Oct</span>
         </div>
-        <div id="chartLegendContainer"></div>
-        <div class="svg-chart-container" id="chartLeftBox"><svg viewBox="0 0 680 250">
-          <text x="10" y="24" font-size="11" font-weight="700" fill="#002b49">1. H.I ALBRECHT</text>
-          <rect x="230" y="10" width="360" height="18" fill="url(#grad_0)" rx="4"></rect>
-          <text x="598" y="24" font-size="11.5" font-weight="800" fill="#005696">17.829</text>
-          <defs>
-            <linearGradient id="grad_0" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#005696"></stop>
-              <stop offset="100%" stop-color="#00a0df"></stop>
-            </linearGradient>
-          </defs>
-        
-          <text x="10" y="58" font-size="11" font-weight="700" fill="#002b49">2. CAP III MET.TRUJILLO</text>
-          <rect x="230" y="44" width="80.78748107016658" height="18" fill="url(#grad_1)" rx="4"></rect>
-          <text x="318.78748107016656" y="58" font-size="11.5" font-weight="800" fill="#005696">4001</text>
-          <defs>
-            <linearGradient id="grad_1" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#005696"></stop>
-              <stop offset="100%" stop-color="#00a0df"></stop>
-            </linearGradient>
-          </defs>
-        
-          <text x="10" y="92" font-size="11" font-weight="700" fill="#002b49">3. C.M. HUANCHACO</text>
-          <rect x="230" y="78" width="13.669863705199393" height="18" fill="url(#grad_2)" rx="4"></rect>
-          <text x="251.6698637051994" y="92" font-size="11.5" font-weight="800" fill="#005696">677</text>
-          <defs>
-            <linearGradient id="grad_2" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#005696"></stop>
-              <stop offset="100%" stop-color="#00a0df"></stop>
-            </linearGradient>
-          </defs>
-        
-          <text x="10" y="126" font-size="11" font-weight="700" fill="#002b49">4. POL. V.LARCO HERRERA</text>
-          <rect x="230" y="112" width="4" height="18" fill="url(#grad_3)" rx="4"></rect>
-          <text x="242" y="126" font-size="11.5" font-weight="800" fill="#005696">3</text>
-          <defs>
-            <linearGradient id="grad_3" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#005696"></stop>
-              <stop offset="100%" stop-color="#00a0df"></stop>
-            </linearGradient>
-          </defs>
-        
-          <text x="10" y="160" font-size="11" font-weight="700" fill="#002b49">5. HOSP. V.DE LA PUERTA</text>
-          <rect x="230" y="146" width="4" height="18" fill="url(#grad_4)" rx="4"></rect>
-          <text x="242" y="160" font-size="11.5" font-weight="800" fill="#005696">3</text>
-          <defs>
-            <linearGradient id="grad_4" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#005696"></stop>
-              <stop offset="100%" stop-color="#00a0df"></stop>
-            </linearGradient>
-          </defs>
-        </svg></div>
+        <div id="chartLegendContainer">
+          <div class="chart-legend-bar">
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#005696;"></span><span>TD1. Generadas</span></div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#0d8a4a;"></span><span>TD2. Con Cita</span></div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#cf222e;"></span><span>TD3. Sin Cita (Embalse)</span></div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#6f42c1;"></span><span>TD4. Resultados</span></div>
+          </div>
+        </div>
+        <div class="svg-chart-container" id="chartLeftBox"><svg viewBox="0 0 720 200"><line x1="45" y1="170" x2="710" y2="170" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="174" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">0</text><line x1="45" y1="132.5" x2="710" y2="132.5" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="136.5" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">1.4k</text><line x1="45" y1="95" x2="710" y2="95" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="99" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">2.7k</text><line x1="45" y1="57.5" x2="710" y2="57.5" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="61.5" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">4.0k</text><line x1="45" y1="20" x2="710" y2="20" stroke="#e2edf4" stroke-width="1"></line><text x="39" y="24" font-size="10" font-weight="600" fill="#627d98" text-anchor="end">5.4k</text><rect x="54.24" y="87.75" width="11.879999999999999" height="82.25" fill="#005696" rx="3"><title>Ene - TD1. Total Generadas: 2961</title></rect><rect x="68.12" y="120.47222222222223" width="11.879999999999999" height="49.52777777777778" fill="#0d8a4a" rx="3"><title>Ene - TD2. Con Cita Asignada: 1783</title></rect><rect x="82" y="139.38888888888889" width="11.879999999999999" height="30.61111111111111" fill="#cf222e" rx="3"><title>Ene - TD3. Sin Cita (Embalse): 1102</title></rect><rect x="95.88" y="146.61111111111111" width="11.879999999999999" height="23.388888888888886" fill="#6f42c1" rx="3"><title>Ene - TD4. Con Resultados: 842</title></rect><text x="78" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Ene</text><rect x="120.24" y="72.30555555555556" width="11.879999999999999" height="97.69444444444444" fill="#005696" rx="3"><title>Feb - TD1. Total Generadas: 3517</title></rect><rect x="134.12" y="109.13888888888889" width="11.879999999999999" height="60.86111111111111" fill="#0d8a4a" rx="3"><title>Feb - TD2. Con Cita Asignada: 2191</title></rect><rect x="148" y="136.77777777777777" width="11.879999999999999" height="33.22222222222222" fill="#cf222e" rx="3"><title>Feb - TD3. Sin Cita (Embalse): 1196</title></rect><rect x="161.88" y="103" width="11.879999999999999" height="67" fill="#6f42c1" rx="3"><title>Feb - TD4. Con Resultados: 2412</title></rect><text x="144" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Feb</text><rect x="186.24" y="63.638888888888886" width="11.879999999999999" height="106.36111111111111" fill="#005696" rx="3"><title>Mar - TD1. Total Generadas: 3829</title></rect><rect x="200.12" y="106.08333333333334" width="11.879999999999999" height="63.916666666666664" fill="#0d8a4a" rx="3"><title>Mar - TD2. Con Cita Asignada: 2301</title></rect><rect x="214" y="131.13888888888889" width="11.879999999999999" height="38.86111111111111" fill="#cf222e" rx="3"><title>Mar - TD3. Sin Cita (Embalse): 1399</title></rect><rect x="227.88" y="129.58333333333334" width="11.879999999999999" height="40.416666666666664" fill="#6f42c1" rx="3"><title>Mar - TD4. Con Resultados: 1455</title></rect><text x="210" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Mar</text><rect x="252.24" y="64.55555555555554" width="11.879999999999999" height="105.44444444444446" fill="#005696" rx="3"><title>Abr - TD1. Total Generadas: 3796</title></rect><rect x="266.12" y="111.66666666666666" width="11.879999999999999" height="58.333333333333336" fill="#0d8a4a" rx="3"><title>Abr - TD2. Con Cita Asignada: 2100</title></rect><rect x="280" y="123.30555555555556" width="11.879999999999999" height="46.69444444444444" fill="#cf222e" rx="3"><title>Abr - TD3. Sin Cita (Embalse): 1681</title></rect><rect x="293.88" y="126.05555555555554" width="11.879999999999999" height="43.94444444444445" fill="#6f42c1" rx="3"><title>Abr - TD4. Con Resultados: 1582</title></rect><text x="276" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Abr</text><rect x="318.24" y="49.277777777777786" width="11.879999999999999" height="120.72222222222221" fill="#005696" rx="3"><title>May - TD1. Total Generadas: 4346</title></rect><rect x="332.12" y="93.55555555555556" width="11.879999999999999" height="76.44444444444444" fill="#0d8a4a" rx="3"><title>May - TD2. Con Cita Asignada: 2752</title></rect><rect x="346" y="126.19444444444444" width="11.879999999999999" height="43.80555555555556" fill="#cf222e" rx="3"><title>May - TD3. Sin Cita (Embalse): 1577</title></rect><rect x="359.88" y="133.41666666666669" width="11.879999999999999" height="36.58333333333333" fill="#6f42c1" rx="3"><title>May - TD4. Con Resultados: 1317</title></rect><text x="342" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">May</text><rect x="384.24" y="41.97222222222223" width="11.879999999999999" height="128.02777777777777" fill="#005696" rx="3"><title>Jun - TD1. Total Generadas: 4609</title></rect><rect x="398.12" y="87.19444444444446" width="11.879999999999999" height="82.80555555555554" fill="#0d8a4a" rx="3"><title>Jun - TD2. Con Cita Asignada: 2981</title></rect><rect x="412" y="124.94444444444446" width="11.879999999999999" height="45.05555555555555" fill="#cf222e" rx="3"><title>Jun - TD3. Sin Cita (Embalse): 1622</title></rect><rect x="425.88" y="130.75" width="11.879999999999999" height="39.25" fill="#6f42c1" rx="3"><title>Jun - TD4. Con Resultados: 1413</title></rect><text x="408" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Jun</text><rect x="450.24" y="70.02777777777779" width="11.879999999999999" height="99.97222222222221" fill="#005696" rx="3"><title>Jul - TD1. Total Generadas: 3599</title></rect><rect x="464.12" y="108.38888888888889" width="11.879999999999999" height="61.611111111111114" fill="#0d8a4a" rx="3"><title>Jul - TD2. Con Cita Asignada: 2218</title></rect><rect x="478" y="131.86111111111111" width="11.879999999999999" height="38.138888888888886" fill="#cf222e" rx="3"><title>Jul - TD3. Sin Cita (Embalse): 1373</title></rect><rect x="491.88" y="135.02777777777777" width="11.879999999999999" height="34.97222222222222" fill="#6f42c1" rx="3"><title>Jul - TD4. Con Resultados: 1259</title></rect><text x="474" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Jul</text><rect x="516.24" y="74.61111111111111" width="11.879999999999999" height="95.38888888888889" fill="#005696" rx="3"><title>Ago - TD1. Total Generadas: 3434</title></rect><rect x="530.12" y="112.16666666666667" width="11.879999999999999" height="57.83333333333333" fill="#0d8a4a" rx="3"><title>Ago - TD2. Con Cita Asignada: 2082</title></rect><rect x="544" y="132.63888888888889" width="11.879999999999999" height="37.361111111111114" fill="#cf222e" rx="3"><title>Ago - TD3. Sin Cita (Embalse): 1345</title></rect><rect x="557.88" y="133.05555555555554" width="11.879999999999999" height="36.94444444444444" fill="#6f42c1" rx="3"><title>Ago - TD4. Con Resultados: 1330</title></rect><text x="540" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Ago</text><rect x="582.24" y="55.80555555555556" width="11.879999999999999" height="114.19444444444444" fill="#005696" rx="3"><title>Set - TD1. Total Generadas: 4111</title></rect><rect x="596.12" y="103.86111111111111" width="11.879999999999999" height="66.13888888888889" fill="#0d8a4a" rx="3"><title>Set - TD2. Con Cita Asignada: 2381</title></rect><rect x="610" y="122.25" width="11.879999999999999" height="47.75" fill="#cf222e" rx="3"><title>Set - TD3. Sin Cita (Embalse): 1719</title></rect><rect x="623.88" y="135.75" width="11.879999999999999" height="34.25" fill="#6f42c1" rx="3"><title>Set - TD4. Con Resultados: 1233</title></rect><text x="606" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Set</text><rect x="648.24" y="75.75" width="11.879999999999999" height="94.25" fill="#005696" rx="3"><title>Oct - TD1. Total Generadas: 3393</title></rect><rect x="662.12" y="122.08333333333334" width="11.879999999999999" height="47.916666666666664" fill="#0d8a4a" rx="3"><title>Oct - TD2. Con Cita Asignada: 1725</title></rect><rect x="676" y="123.72222222222223" width="11.879999999999999" height="46.27777777777778" fill="#cf222e" rx="3"><title>Oct - TD3. Sin Cita (Embalse): 1666</title></rect><rect x="689.88" y="137.69444444444446" width="11.879999999999999" height="32.30555555555556" fill="#6f42c1" rx="3"><title>Oct - TD4. Con Resultados: 1163</title></rect><text x="672" y="190" font-size="11.5" font-weight="700" fill="#002b49" text-anchor="middle">Oct</text></svg></div>
       </div>
 
       <div class="panel">
         <div class="panel-head">
           <div>
-            <div class="panel-title" id="chartRightTitle">Distribución Porcentual por IPRESS</div>
-            <div class="panel-sub" id="chartRightSub">Participación de la Red Asistencial en citas otorgadas</div>
+            <div class="panel-title" id="chartRightTitle">Participación por Modalidad Diagnóstica</div>
+            <div class="panel-sub" id="chartRightSub">Volumen acumulado en el periodo según filtros activos</div>
           </div>
         </div>
-        <div class="svg-chart-container" id="chartRightBox"><div class="legend-list" style="margin-top:15px; font-size:12.5px;">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#005696;"></span>
-            <div><strong>H.I ALBRECHT</strong>: 17.829 (79.2%)</div>
+        <div class="svg-chart-container" id="chartRightBox">
+        <div class="donut-layout">
+          <div class="donut-svg-box">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#eaf1f6" stroke-width="16"></circle>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#005696" stroke-width="16" stroke-dasharray="103.23760638447769 219.9114857512855" stroke-dashoffset="0" transform="rotate(-90 50 50)"></circle>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#00a0df" stroke-width="16" stroke-dasharray="101.83957885170584 219.9114857512855" stroke-dashoffset="-103.23760638447769" transform="rotate(-90 50 50)"></circle>
+              <circle cx="50" cy="50" r="35" fill="none" stroke="#e67e22" stroke-width="16" stroke-dasharray="14.83430051510201 219.9114857512855" stroke-dashoffset="-205.07718523618354" transform="rotate(-90 50 50)"></circle>
+            </svg>
+            <div class="donut-center-text">
+              <div class="donut-center-num">37.6k</div>
+              <div class="donut-center-lbl">Total</div>
+            </div>
           </div>
-        
-          <div class="legend-item">
-            <span class="legend-color" style="background:#00a0df;"></span>
-            <div><strong>CAP III MET.TRUJILLO</strong>: 4001 (17.8%)</div>
+          <div class="legend-list">
+            <div class="legend-item"><span class="legend-color" style="background: #005696;"></span><div><strong>Radiología</strong>: 17.649 (46.9%)</div></div>
+            <div class="legend-item"><span class="legend-color" style="background: #00a0df;"></span><div><strong>Ultrasonido</strong>: 17.410 (46.3%)</div></div>
+            <div class="legend-item"><span class="legend-color" style="background: #e67e22;"></span><div><strong>Mamografía</strong>: 2536 (6.7%)</div></div>
           </div>
-        
-          <div class="legend-item">
-            <span class="legend-color" style="background:#10b981;"></span>
-            <div><strong>C.M. HUANCHACO</strong>: 677 (3.0%)</div>
-          </div>
-        
-          <div class="legend-item">
-            <span class="legend-color" style="background:#f59e0b;"></span>
-            <div><strong>POL. V.LARCO HERRERA</strong>: 3 (0.0%)</div>
-          </div>
-        
-          <div class="legend-item">
-            <span class="legend-color" style="background:#6f42c1;"></span>
-            <div><strong>HOSP. V.DE LA PUERTA</strong>: 3 (0.0%)</div>
-          </div>
-        </div></div>
+        </div>
+      </div>
       </div>
     </div>
 
     <!-- CONTENEDOR DE TABLAS -->
     <div class="table-card">
       <div class="table-top">
-        <h3 id="tableCardTitle">🏥 SOLICITUDES CITADAS POR IPRESS (RED ASISTENCIAL)</h3>
-        <span id="tableMetaInfo">Hoja: SOLICITUDES CITADAS POR IPRES | Filtro: Todas las IPRESS | Área: Todas las Áreas</span>
+        <h3 id="tableCardTitle">📑 MATRIZ CONSOLIDADA DE LAS 4 TABLAS DINÁMICAS</h3>
+        <span id="tableMetaInfo">Filtros: Todas las Áreas | Periodo: Ene a Oct 2026</span>
       </div>
-      <div class="table-wrap" id="tableContainer"><table><thead><tr><th>IPRESS / Área Asistencial / Modalidad</th><th class="num">Ene</th><th class="num">Feb</th><th class="num">Mar</th><th class="num">Abr</th><th class="num">May</th><th class="num">Jun</th><th class="num">Jul</th><th class="num">Ago</th><th class="num">Set</th><th class="num">Oct</th><th class="num">Total general</th></tr></thead><tbody><tr class="bold-row"><td><strong>🏥 H.I ALBRECHT</strong></td><td class="num">1109</td><td class="num">1618</td><td class="num">1544</td><td class="num">1433</td><td class="num">2179</td><td class="num">2333</td><td class="num">1703</td><td class="num">1908</td><td class="num">2327</td><td class="num">1675</td><td class="num" style="font-weight:700;">17.829</td></tr><tr class="sub-item"><td>↳ CONSULTA EXTERNA</td><td class="num">709</td><td class="num">1233</td><td class="num">1120</td><td class="num">1067</td><td class="num">1865</td><td class="num">2000</td><td class="num">1382</td><td class="num">1501</td><td class="num">1884</td><td class="num">1239</td><td class="num" style="font-weight:700;">14.000</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• RADIOLOGIA DIAGNOSTICA</td><td class="num">463</td><td class="num">804</td><td class="num">845</td><td class="num">797</td><td class="num">920</td><td class="num">870</td><td class="num">672</td><td class="num">633</td><td class="num">776</td><td class="num">735</td><td class="num">7515</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• ULTRASONIDO DIAGNOSTICO</td><td class="num">246</td><td class="num">428</td><td class="num">275</td><td class="num">270</td><td class="num">945</td><td class="num">1130</td><td class="num">710</td><td class="num">868</td><td class="num">1108</td><td class="num">504</td><td class="num">6484</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• MAMOGRAFIA</td><td class="num">-</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td></tr><tr class="sub-item"><td>↳ URGENCIAS / EMERGENCIA</td><td class="num">389</td><td class="num">378</td><td class="num">416</td><td class="num">347</td><td class="num">299</td><td class="num">319</td><td class="num">311</td><td class="num">389</td><td class="num">429</td><td class="num">405</td><td class="num" style="font-weight:700;">3682</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• RADIOLOGIA DIAGNOSTICA</td><td class="num">384</td><td class="num">362</td><td class="num">389</td><td class="num">314</td><td class="num">276</td><td class="num">285</td><td class="num">272</td><td class="num">368</td><td class="num">377</td><td class="num">366</td><td class="num">3393</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• ULTRASONIDO DIAGNOSTICO</td><td class="num">5</td><td class="num">16</td><td class="num">27</td><td class="num">33</td><td class="num">23</td><td class="num">34</td><td class="num">39</td><td class="num">21</td><td class="num">52</td><td class="num">39</td><td class="num">289</td></tr><tr class="sub-item"><td>↳ HOSPITALIZACION</td><td class="num">10</td><td class="num">7</td><td class="num">8</td><td class="num">18</td><td class="num">15</td><td class="num">14</td><td class="num">10</td><td class="num">18</td><td class="num">14</td><td class="num">30</td><td class="num" style="font-weight:700;">144</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• RADIOLOGIA DIAGNOSTICA</td><td class="num">10</td><td class="num">4</td><td class="num">4</td><td class="num">10</td><td class="num">5</td><td class="num">5</td><td class="num">4</td><td class="num">10</td><td class="num">8</td><td class="num">13</td><td class="num">73</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• ULTRASONIDO DIAGNOSTICO</td><td class="num">-</td><td class="num">3</td><td class="num">4</td><td class="num">8</td><td class="num">10</td><td class="num">9</td><td class="num">6</td><td class="num">8</td><td class="num">6</td><td class="num">17</td><td class="num">71</td></tr><tr class="sub-item"><td>↳ CENTRO QUIRURGICO</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num" style="font-weight:700;">3</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• RADIOLOGIA DIAGNOSTICA</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num">2</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• ULTRASONIDO DIAGNOSTICO</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td></tr><tr class="bold-row"><td><strong>🏥 CAP III MET.TRUJILLO</strong></td><td class="num">551</td><td class="num">571</td><td class="num">618</td><td class="num">574</td><td class="num">570</td><td class="num">521</td><td class="num">424</td><td class="num">170</td><td class="num">2</td><td class="num">-</td><td class="num" style="font-weight:700;">4001</td></tr><tr class="sub-item"><td>↳ CONSULTA EXTERNA</td><td class="num">551</td><td class="num">571</td><td class="num">618</td><td class="num">574</td><td class="num">570</td><td class="num">521</td><td class="num">424</td><td class="num">170</td><td class="num">2</td><td class="num">-</td><td class="num" style="font-weight:700;">4001</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• RADIOLOGIA DIAGNOSTICA</td><td class="num">551</td><td class="num">570</td><td class="num">617</td><td class="num">573</td><td class="num">570</td><td class="num">516</td><td class="num">420</td><td class="num">168</td><td class="num">-</td><td class="num">-</td><td class="num">3985</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• ULTRASONIDO DIAGNOSTICO</td><td class="num">-</td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="num">-</td><td class="num">5</td><td class="num">4</td><td class="num">2</td><td class="num">2</td><td class="num">-</td><td class="num">16</td></tr><tr class="bold-row"><td><strong>🏥 C.M. HUANCHACO</strong></td><td class="num">123</td><td class="num">2</td><td class="num">136</td><td class="num">93</td><td class="num">2</td><td class="num">126</td><td class="num">90</td><td class="num">3</td><td class="num">52</td><td class="num">50</td><td class="num" style="font-weight:700;">677</td></tr><tr class="sub-item"><td>↳ CONSULTA EXTERNA</td><td class="num">123</td><td class="num">2</td><td class="num">136</td><td class="num">93</td><td class="num">2</td><td class="num">126</td><td class="num">90</td><td class="num">3</td><td class="num">52</td><td class="num">50</td><td class="num" style="font-weight:700;">677</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• RADIOLOGIA DIAGNOSTICA</td><td class="num">123</td><td class="num">2</td><td class="num">136</td><td class="num">93</td><td class="num">1</td><td class="num">123</td><td class="num">89</td><td class="num">1</td><td class="num">47</td><td class="num">50</td><td class="num">665</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• ULTRASONIDO DIAGNOSTICO</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num">3</td><td class="num">1</td><td class="num">2</td><td class="num">5</td><td class="num">-</td><td class="num">12</td></tr><tr class="bold-row"><td><strong>🏥 POL. V.LARCO HERRERA</strong></td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num" style="font-weight:700;">3</td></tr><tr class="sub-item"><td>↳ CONSULTA EXTERNA</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num" style="font-weight:700;">3</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• ULTRASONIDO DIAGNOSTICO</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">2</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• RADIOLOGIA DIAGNOSTICA</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">1</td></tr><tr class="bold-row"><td><strong>🏥 HOSP. V.DE LA PUERTA</strong></td><td class="num">-</td><td class="num">-</td><td class="num">3</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num" style="font-weight:700;">3</td></tr><tr class="sub-item"><td>↳ CONSULTA EXTERNA</td><td class="num">-</td><td class="num">-</td><td class="num">3</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num" style="font-weight:700;">3</td></tr><tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• RADIOLOGIA DIAGNOSTICA</td><td class="num">-</td><td class="num">-</td><td class="num">3</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">-</td><td class="num">3</td></tr><tr class="grand-total"><td>Total General Citas</td><td class="num">1783</td><td class="num">2191</td><td class="num">2301</td><td class="num">2100</td><td class="num">2752</td><td class="num">2981</td><td class="num">2218</td><td class="num">2081</td><td class="num">2381</td><td class="num">1725</td><td class="num">22.513</td></tr></tbody></table></div>
+      <div class="table-wrap" id="tableContainer">
+        <table>
+          <thead>
+            <tr>
+              <th>Área / Modalidad Diagnóstica</th>
+              <th class="num">TD1. Total Generadas</th>
+              <th class="num">TD2. Con Cita</th>
+              <th class="num">% Asignación</th>
+              <th class="num">TD3. Sin Cita (Embalse)</th>
+              <th class="num">% Embalse</th>
+              <th class="num">TD4. Con Resultados</th>
+              <th class="num">% Cobertura</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+          <tr>
+            <td><strong>🔵 RADIOLOGIA DIAGNOSTICA</strong></td>
+            <td class="num">17.649</td>
+            <td class="num" style="color:var(--success); font-weight:700;">15.638</td>
+            <td class="num">88.6%</td>
+            <td class="num" style="color:var(--danger); font-weight:700;">1719</td>
+            <td class="num">9.7%</td>
+            <td class="num" style="color:var(--purple); font-weight:700;">7259</td>
+            <td class="num">41.1%</td>
+          </tr>
+        
+          <tr>
+            <td><strong>🟢 ULTRASONIDO DIAGNOSTICO</strong></td>
+            <td class="num">17.410</td>
+            <td class="num" style="color:var(--success); font-weight:700;">6875</td>
+            <td class="num">39.5%</td>
+            <td class="num" style="color:var(--danger); font-weight:700;">10.426</td>
+            <td class="num">59.9%</td>
+            <td class="num" style="color:var(--purple); font-weight:700;">6745</td>
+            <td class="num">38.7%</td>
+          </tr>
+        
+          <tr>
+            <td><strong>🟡 MAMOGRAFIA</strong></td>
+            <td class="num">2536</td>
+            <td class="num" style="color:var(--success); font-weight:700;">1</td>
+            <td class="num">0.0%</td>
+            <td class="num" style="color:var(--danger); font-weight:700;">2535</td>
+            <td class="num">100.0%</td>
+            <td class="num" style="color:var(--purple); font-weight:700;">2</td>
+            <td class="num">0.1%</td>
+          </tr>
+        
+            <tr class="grand-total">
+              <td>Total General Seleccionado</td>
+              <td class="num">37.595</td>
+              <td class="num">22.514</td>
+              <td class="num">59.9%</td>
+              <td class="num">14.680</td>
+              <td class="num">39.0%</td>
+              <td class="num">14.006</td>
+              <td class="num">37.3%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </div>
@@ -462,375 +503,20 @@
   
 
   <script>
-    let MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Set", "Oct"];
+    let MONTHS = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct"];
     const FULL_MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"];
 
     // 1. BASE DE DATOS EXACTA EXTRAÍDA DE LAS TABLAS DINÁMICAS OFICIALES (TD1, TD2, TD3, TD4)
-    const PIVOT_DB = {
-      td1: {
-        total: {
-          "ALL": [2961, 3517, 3829, 3796, 4346, 4609, 3599, 3434, 4111, 3393],
-          "CONSULTA EXTERNA": [2503, 3054, 3318, 3356, 3944, 4206, 3202, 2957, 3569, 2874],
-          "URGENCIAS / EMERGENCIA": [443, 452, 501, 417, 386, 388, 383, 459, 523, 483],
-          "HOSPITALIZACION": [14, 11, 10, 21, 16, 15, 14, 18, 19, 35],
-          "CENTRO QUIRURGICO": [1, 0, 0, 2, 0, 0, 0, 0, 0, 1]
-        },
-        rows: {
-          "CONSULTA EXTERNA": [
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 16718, vals: [1060, 1385, 1318, 1445, 1935, 2171, 1603, 1799, 2287, 1715] },
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 13731, vals: [1209, 1485, 1760, 1598, 1687, 1733, 1364, 939, 985, 971] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 2534, vals: [234, 184, 240, 313, 322, 302, 235, 219, 297, 188] }
-          ],
-          "URGENCIAS / EMERGENCIA": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 3837, vals: [414, 407, 445, 354, 332, 324, 314, 403, 436, 408] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 596, vals: [28, 45, 56, 63, 54, 64, 68, 56, 87, 75] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 2, vals: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0] }
-          ],
-          "HOSPITALIZACION": [
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 95, vals: [3, 7, 6, 10, 11, 10, 9, 8, 10, 21] },
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 78, vals: [11, 4, 4, 11, 5, 5, 5, 10, 9, 14] }
-          ],
-          "CENTRO QUIRURGICO": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 3, vals: [0, 0, 0, 2, 0, 0, 0, 0, 0, 1] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 1, vals: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
-          ],
-          "ALL": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 17649, vals: [1634, 1896, 2209, 1965, 2024, 2062, 1683, 1352, 1430, 1394] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 17410, vals: [1092, 1437, 1380, 1518, 2000, 2245, 1680, 1863, 2384, 1811] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 2536, vals: [235, 184, 240, 313, 322, 302, 236, 219, 297, 188] }
-          ]
-        }
-      },
-      td2: {
-        total: {
-          "ALL": [1783, 2191, 2301, 2100, 2752, 2981, 2218, 2082, 2381, 1725],
-          "CONSULTA EXTERNA": [1383, 1806, 1877, 1734, 2438, 2648, 1897, 1675, 1938, 1289],
-          "URGENCIAS / EMERGENCIA": [389, 378, 416, 347, 299, 319, 311, 389, 429, 405],
-          "HOSPITALIZACION": [10, 7, 8, 18, 15, 14, 10, 18, 14, 30],
-          "CENTRO QUIRURGICO": [1, 0, 0, 1, 0, 0, 0, 0, 0, 1]
-        },
-        rows: {
-          "CONSULTA EXTERNA": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 12170, vals: [1137, 1376, 1601, 1463, 1491, 1509, 1182, 803, 823, 785] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 6514, vals: [246, 429, 276, 271, 947, 1139, 715, 872, 1115, 504] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 1, vals: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
-          ],
-          "URGENCIAS / EMERGENCIA": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 3393, vals: [384, 362, 389, 314, 276, 285, 272, 368, 377, 366] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 289, vals: [5, 16, 27, 33, 23, 34, 39, 21, 52, 39] }
-          ],
-          "HOSPITALIZACION": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 73, vals: [10, 4, 4, 10, 5, 5, 4, 10, 8, 13] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 71, vals: [0, 3, 4, 8, 10, 9, 6, 8, 6, 17] }
-          ],
-          "CENTRO QUIRURGICO": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 2, vals: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 1, vals: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
-          ],
-          "ALL": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 15638, vals: [1531, 1742, 1994, 1788, 1772, 1799, 1458, 1181, 1208, 1165] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 6875, vals: [252, 448, 307, 312, 980, 1182, 760, 901, 1173, 560] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 1, vals: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
-          ]
-        }
-      },
-      td3: {
-        total: {
-          "ALL": [1102, 1196, 1399, 1681, 1577, 1622, 1373, 1345, 1719, 1666],
-          "CONSULTA EXTERNA": [1067, 1161, 1352, 1611, 1491, 1553, 1300, 1275, 1623, 1583],
-          "URGENCIAS / EMERGENCIA": [32, 31, 45, 67, 85, 68, 70, 70, 92, 78],
-          "HOSPITALIZACION": [3, 4, 2, 2, 1, 1, 3, 0, 4, 5],
-          "CENTRO QUIRURGICO": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
-        },
-        rows: {
-          "CONSULTA EXTERNA": [
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 10108, vals: [805, 932, 1021, 1166, 978, 1028, 883, 921, 1165, 1209] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 2533, vals: [234, 183, 240, 313, 322, 302, 235, 219, 297, 188] },
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 1375, vals: [28, 46, 91, 132, 191, 223, 182, 135, 161, 186] }
-          ],
-          "URGENCIAS / EMERGENCIA": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 341, vals: [8, 6, 21, 37, 54, 39, 42, 35, 57, 42] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 295, vals: [23, 25, 24, 30, 31, 29, 27, 35, 35, 36] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 2, vals: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0] }
-          ],
-          "HOSPITALIZACION": [
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 23, vals: [3, 4, 2, 2, 1, 1, 3, 0, 3, 4] },
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 2, vals: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1] }
-          ],
-          "CENTRO QUIRURGICO": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 1, vals: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }
-          ],
-          "ALL": [
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 10426, vals: [831, 961, 1047, 1198, 1010, 1058, 913, 956, 1203, 1249] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 2535, vals: [235, 183, 240, 313, 322, 302, 236, 219, 297, 188] },
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 1719, vals: [36, 52, 112, 170, 245, 262, 224, 170, 219, 229] }
-          ]
-        }
-      },
-      td4: {
-        total: {
-          "ALL": [842, 2412, 1455, 1582, 1317, 1413, 1259, 1330, 1233, 1163],
-          "CONSULTA EXTERNA": [651, 2151, 1360, 1349, 1250, 1325, 1179, 1273, 1116, 1047],
-          "URGENCIAS / EMERGENCIA": [183, 252, 88, 216, 54, 77, 72, 45, 107, 85],
-          "HOSPITALIZACION": [8, 9, 7, 17, 13, 11, 8, 12, 10, 30],
-          "CENTRO QUIRURGICO": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
-        },
-        rows: {
-          "ALL": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 7259, vals: [836, 1798, 718, 1243, 566, 524, 674, 613, 135, 152] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 6745, vals: [6, 613, 736, 339, 751, 889, 585, 717, 1098, 1011] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 2, vals: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0] }
-          ],
-          "CONSULTA EXTERNA": [
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 6382, vals: [183, 604, 704, 306, 744, 848, 545, 689, 997, 762] },
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 6317, vals: [468, 1546, 655, 1043, 506, 477, 634, 584, 119, 285] },
-            { name: "MAMOGRAFIA", area: "MAMO", total: 2, vals: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0] }
-          ],
-          "URGENCIAS / EMERGENCIA": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 884, vals: [178, 233, 56, 181, 32, 43, 34, 25, 55, 47] },
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 295, vals: [5, 19, 32, 35, 22, 34, 38, 20, 52, 38] }
-          ],
-          "HOSPITALIZACION": [
-            { name: "ULTRASONIDO DIAGNOSTICO", area: "ULTRA", total: 68, vals: [3, 2, 5, 9, 9, 7, 4, 8, 5, 16] },
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 57, vals: [5, 7, 2, 8, 4, 4, 4, 4, 5, 14] }
-          ],
-          "CENTRO QUIRURGICO": [
-            { name: "RADIOLOGIA DIAGNOSTICA", area: "RAD", total: 1, vals: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }
-          ]
-        }
-      }
-    };
+    let PIVOT_DB = {"td1":{"total":{"ALL":[2961,3517,3829,3796,4346,4609,3599,3434,4111,3393],"CONSULTA EXTERNA":[2503,3054,3318,3356,3944,4206,3202,2957,3569,2874],"URGENCIAS / EMERGENCIA":[443,452,501,417,386,388,383,459,523,483],"HOSPITALIZACION":[14,11,10,21,16,15,14,18,19,35],"CENTRO QUIRURGICO":[1,0,0,2,0,0,0,0,0,1]},"rows":{"CONSULTA EXTERNA":[{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":16718,"vals":[1060,1385,1318,1445,1935,2171,1603,1799,2287,1715]},{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":13731,"vals":[1209,1485,1760,1598,1687,1733,1364,939,985,971]},{"name":"MAMOGRAFIA","area":"MAMO","total":2534,"vals":[234,184,240,313,322,302,235,219,297,188]}],"URGENCIAS / EMERGENCIA":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":3837,"vals":[414,407,445,354,332,324,314,403,436,408]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":596,"vals":[28,45,56,63,54,64,68,56,87,75]},{"name":"MAMOGRAFIA","area":"MAMO","total":2,"vals":[1,0,0,0,0,0,1,0,0,0]}],"HOSPITALIZACION":[{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":95,"vals":[3,7,6,10,11,10,9,8,10,21]},{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":78,"vals":[11,4,4,11,5,5,5,10,9,14]}],"CENTRO QUIRURGICO":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":3,"vals":[0,0,0,2,0,0,0,0,0,1]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":1,"vals":[1,0,0,0,0,0,0,0,0,0]}],"ALL":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":17649,"vals":[1634,1896,2209,1965,2024,2062,1683,1352,1430,1394]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":17410,"vals":[1092,1437,1380,1518,2000,2245,1680,1863,2384,1811]},{"name":"MAMOGRAFIA","area":"MAMO","total":2536,"vals":[235,184,240,313,322,302,236,219,297,188]}]}},"td2":{"total":{"ALL":[1783,2191,2301,2100,2752,2981,2218,2082,2381,1725],"CONSULTA EXTERNA":[1383,1806,1877,1734,2438,2648,1897,1675,1938,1289],"URGENCIAS / EMERGENCIA":[389,378,416,347,299,319,311,389,429,405],"HOSPITALIZACION":[10,7,8,18,15,14,10,18,14,30],"CENTRO QUIRURGICO":[1,0,0,1,0,0,0,0,0,1]},"rows":{"CONSULTA EXTERNA":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":12170,"vals":[1137,1376,1601,1463,1491,1509,1182,803,823,785]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":6514,"vals":[246,429,276,271,947,1139,715,872,1115,504]},{"name":"MAMOGRAFIA","area":"MAMO","total":1,"vals":[0,1,0,0,0,0,0,0,0,0]}],"URGENCIAS / EMERGENCIA":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":3393,"vals":[384,362,389,314,276,285,272,368,377,366]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":289,"vals":[5,16,27,33,23,34,39,21,52,39]}],"HOSPITALIZACION":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":73,"vals":[10,4,4,10,5,5,4,10,8,13]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":71,"vals":[0,3,4,8,10,9,6,8,6,17]}],"CENTRO QUIRURGICO":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":2,"vals":[0,0,0,1,0,0,0,0,0,1]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":1,"vals":[1,0,0,0,0,0,0,0,0,0]}],"ALL":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":15638,"vals":[1531,1742,1994,1788,1772,1799,1458,1181,1208,1165]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":6875,"vals":[252,448,307,312,980,1182,760,901,1173,560]},{"name":"MAMOGRAFIA","area":"MAMO","total":1,"vals":[0,1,0,0,0,0,0,0,0,0]}]}},"td3":{"total":{"ALL":[1102,1196,1399,1681,1577,1622,1373,1345,1719,1666],"CONSULTA EXTERNA":[1067,1161,1352,1611,1491,1553,1300,1275,1623,1583],"URGENCIAS / EMERGENCIA":[32,31,45,67,85,68,70,70,92,78],"HOSPITALIZACION":[3,4,2,2,1,1,3,0,4,5],"CENTRO QUIRURGICO":[0,0,0,1,0,0,0,0,0,0]},"rows":{"CONSULTA EXTERNA":[{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":10108,"vals":[805,932,1021,1166,978,1028,883,921,1165,1209]},{"name":"MAMOGRAFIA","area":"MAMO","total":2533,"vals":[234,183,240,313,322,302,235,219,297,188]},{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":1375,"vals":[28,46,91,132,191,223,182,135,161,186]}],"URGENCIAS / EMERGENCIA":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":341,"vals":[8,6,21,37,54,39,42,35,57,42]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":295,"vals":[23,25,24,30,31,29,27,35,35,36]},{"name":"MAMOGRAFIA","area":"MAMO","total":2,"vals":[1,0,0,0,0,0,1,0,0,0]}],"HOSPITALIZACION":[{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":23,"vals":[3,4,2,2,1,1,3,0,3,4]},{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":2,"vals":[0,0,0,0,0,0,0,0,1,1]}],"CENTRO QUIRURGICO":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":1,"vals":[0,0,0,1,0,0,0,0,0,0]}],"ALL":[{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":10426,"vals":[831,961,1047,1198,1010,1058,913,956,1203,1249]},{"name":"MAMOGRAFIA","area":"MAMO","total":2535,"vals":[235,183,240,313,322,302,236,219,297,188]},{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":1719,"vals":[36,52,112,170,245,262,224,170,219,229]}]}},"td4":{"total":{"ALL":[842,2412,1455,1582,1317,1413,1259,1330,1233,1163],"CONSULTA EXTERNA":[651,2151,1360,1349,1250,1325,1179,1273,1116,1047],"URGENCIAS / EMERGENCIA":[183,252,88,216,54,77,72,45,107,85],"HOSPITALIZACION":[8,9,7,17,13,11,8,12,10,30],"CENTRO QUIRURGICO":[0,0,0,0,0,0,0,0,0,1]},"rows":{"ALL":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":7259,"vals":[836,1798,718,1243,566,524,674,613,135,152]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":6745,"vals":[6,613,736,339,751,889,585,717,1098,1011]},{"name":"MAMOGRAFIA","area":"MAMO","total":2,"vals":[0,1,1,0,0,0,0,0,0,0]}],"CONSULTA EXTERNA":[{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":6382,"vals":[183,604,704,306,744,848,545,689,997,762]},{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":6317,"vals":[468,1546,655,1043,506,477,634,584,119,285]},{"name":"MAMOGRAFIA","area":"MAMO","total":2,"vals":[0,1,1,0,0,0,0,0,0,0]}],"URGENCIAS / EMERGENCIA":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":884,"vals":[178,233,56,181,32,43,34,25,55,47]},{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":295,"vals":[5,19,32,35,22,34,38,20,52,38]}],"HOSPITALIZACION":[{"name":"ULTRASONIDO DIAGNOSTICO","area":"ULTRA","total":68,"vals":[3,2,5,9,9,7,4,8,5,16]},{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":57,"vals":[5,7,2,8,4,4,4,4,5,14]}],"CENTRO QUIRURGICO":[{"name":"RADIOLOGIA DIAGNOSTICA","area":"RAD","total":1,"vals":[0,0,0,0,0,0,0,0,0,1]}]}}};
 
-    // 2. BASE DE DATOS EXACTA 1:1 DE "SOLICITUDES CITADAS POR IPRES" (CAPTURA 29)
-    const IPRESS_DB = {
-      ipressList: [
-        {
-          name: "H.I ALBRECHT",
-          total: 17829,
-          vals: [1109, 1618, 1544, 1433, 2179, 2333, 1703, 1908, 2327, 1675],
-          areas: {
-            "CONSULTA EXTERNA": {
-              total: 14000,
-              mods: [
-                { name: "RADIOLOGIA DIAGNOSTICA", total: 7515, vals: [463, 804, 845, 797, 920, 870, 672, 633, 776, 735] },
-                { name: "ULTRASONIDO DIAGNOSTICO", total: 6484, vals: [246, 428, 275, 270, 945, 1130, 710, 868, 1108, 504] },
-                { name: "MAMOGRAFIA", total: 1, vals: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0] }
-              ]
-            },
-            "URGENCIAS / EMERGENCIA": {
-              total: 3682,
-              mods: [
-                { name: "RADIOLOGIA DIAGNOSTICA", total: 3393, vals: [384, 362, 389, 314, 276, 285, 272, 368, 377, 366] },
-                { name: "ULTRASONIDO DIAGNOSTICO", total: 289, vals: [5, 16, 27, 33, 23, 34, 39, 21, 52, 39] }
-              ]
-            },
-            "HOSPITALIZACION": {
-              total: 144,
-              mods: [
-                { name: "RADIOLOGIA DIAGNOSTICA", total: 73, vals: [10, 4, 4, 10, 5, 5, 4, 10, 8, 13] },
-                { name: "ULTRASONIDO DIAGNOSTICO", total: 71, vals: [0, 3, 4, 8, 10, 9, 6, 8, 6, 17] }
-              ]
-            },
-            "CENTRO QUIRURGICO": {
-              total: 3,
-              mods: [
-                { name: "RADIOLOGIA DIAGNOSTICA", total: 2, vals: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1] },
-                { name: "ULTRASONIDO DIAGNOSTICO", total: 1, vals: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
-              ]
-            }
-          }
-        },
-        {
-          name: "CAP III MET.TRUJILLO",
-          total: 4001,
-          vals: [551, 571, 618, 574, 570, 521, 424, 170, 2, 0],
-          areas: {
-            "CONSULTA EXTERNA": {
-              total: 4001,
-              mods: [
-                { name: "RADIOLOGIA DIAGNOSTICA", total: 3985, vals: [551, 570, 617, 573, 570, 516, 420, 168, 0, 0] },
-                { name: "ULTRASONIDO DIAGNOSTICO", total: 16, vals: [0, 1, 1, 1, 0, 5, 4, 2, 2, 0] }
-              ]
-            }
-          }
-        },
-        {
-          name: "C.M. HUANCHACO",
-          total: 677,
-          vals: [123, 2, 136, 93, 2, 126, 90, 3, 52, 50],
-          areas: {
-            "CONSULTA EXTERNA": {
-              total: 677,
-              mods: [
-                { name: "RADIOLOGIA DIAGNOSTICA", total: 665, vals: [123, 2, 136, 93, 1, 123, 89, 1, 47, 50] },
-                { name: "ULTRASONIDO DIAGNOSTICO", total: 12, vals: [0, 0, 0, 0, 1, 3, 1, 2, 5, 0] }
-              ]
-            }
-          }
-        },
-        {
-          name: "POL. V.LARCO HERRERA",
-          total: 3,
-          vals: [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-          areas: {
-            "CONSULTA EXTERNA": {
-              total: 3,
-              mods: [
-                { name: "ULTRASONIDO DIAGNOSTICO", total: 2, vals: [0, 0, 0, 0, 1, 1, 0, 0, 0, 0] },
-                { name: "RADIOLOGIA DIAGNOSTICA", total: 1, vals: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0] }
-              ]
-            }
-          }
-        },
-        {
-          name: "HOSP. V.DE LA PUERTA",
-          total: 3,
-          vals: [0, 0, 3, 0, 0, 0, 0, 0, 0, 0],
-          areas: {
-            "CONSULTA EXTERNA": {
-              total: 3,
-              mods: [
-                { name: "RADIOLOGIA DIAGNOSTICA", total: 3, vals: [0, 0, 3, 0, 0, 0, 0, 0, 0, 0] }
-              ]
-            }
-          }
-        }
-      ]
-    };
+    // 2. BASE DE DATOS EXACTA 1:1 DE "SOLICITUDES CITADAS POR IPRES"
+    let IPRESS_DB = {"ipressList":[{"name":"H.I ALBRECHT","total":17829,"vals":[1109,1618,1544,1433,2179,2333,1703,1908,2327,1675],"areas":{"CONSULTA EXTERNA":{"total":14000,"mods":[{"name":"RADIOLOGIA DIAGNOSTICA","total":7515,"vals":[463,804,845,797,920,870,672,633,776,735]},{"name":"ULTRASONIDO DIAGNOSTICO","total":6484,"vals":[246,428,275,270,945,1130,710,868,1108,504]},{"name":"MAMOGRAFIA","total":1,"vals":[0,1,0,0,0,0,0,0,0,0]}]},"URGENCIAS / EMERGENCIA":{"total":3682,"mods":[{"name":"RADIOLOGIA DIAGNOSTICA","total":3393,"vals":[384,362,389,314,276,285,272,368,377,366]},{"name":"ULTRASONIDO DIAGNOSTICO","total":289,"vals":[5,16,27,33,23,34,39,21,52,39]}]},"HOSPITALIZACION":{"total":144,"mods":[{"name":"RADIOLOGIA DIAGNOSTICA","total":73,"vals":[10,4,4,10,5,5,4,10,8,13]},{"name":"ULTRASONIDO DIAGNOSTICO","total":71,"vals":[0,3,4,8,10,9,6,8,6,17]}]},"CENTRO QUIRURGICO":{"total":3,"mods":[{"name":"RADIOLOGIA DIAGNOSTICA","total":2,"vals":[0,0,0,1,0,0,0,0,0,1]},{"name":"ULTRASONIDO DIAGNOSTICO","total":1,"vals":[1,0,0,0,0,0,0,0,0,0]}]}}},{"name":"CAP III MET.TRUJILLO","total":4001,"vals":[551,571,618,574,570,521,424,170,2,0],"areas":{"CONSULTA EXTERNA":{"total":4001,"mods":[{"name":"RADIOLOGIA DIAGNOSTICA","total":3985,"vals":[551,570,617,573,570,516,420,168,0,0]},{"name":"ULTRASONIDO DIAGNOSTICO","total":16,"vals":[0,1,1,1,0,5,4,2,2,0]}]}}},{"name":"C.M. HUANCHACO","total":677,"vals":[123,2,136,93,2,126,90,3,52,50],"areas":{"CONSULTA EXTERNA":{"total":677,"mods":[{"name":"RADIOLOGIA DIAGNOSTICA","total":665,"vals":[123,2,136,93,1,123,89,1,47,50]},{"name":"ULTRASONIDO DIAGNOSTICO","total":12,"vals":[0,0,0,0,1,3,1,2,5,0]}]}}},{"name":"POL. V.LARCO HERRERA","total":3,"vals":[0,0,0,0,1,1,1,0,0,0],"areas":{"CONSULTA EXTERNA":{"total":3,"mods":[{"name":"ULTRASONIDO DIAGNOSTICO","total":2,"vals":[0,0,0,0,1,1,0,0,0,0]},{"name":"RADIOLOGIA DIAGNOSTICA","total":1,"vals":[0,0,0,0,0,0,1,0,0,0]}]}}},{"name":"HOSP. V.DE LA PUERTA","total":3,"vals":[0,0,3,0,0,0,0,0,0,0],"areas":{"CONSULTA EXTERNA":{"total":3,"mods":[{"name":"RADIOLOGIA DIAGNOSTICA","total":3,"vals":[0,0,3,0,0,0,0,0,0,0]}]}}}]};
 
     // 3. BASE DE DATOS EXACTA 1:1 DE "TOMA DE RAYOS X" (TECNÓLOGOS)
-    const TOMA_DB = {
-      "CONSULTA EXTERNA": {
-        total: 12169, atendidos: 11333, desertados: 823, pendientes: 13,
-        monthly: [1137, 1377, 1601, 1462, 1491, 1509, 1182, 803, 822, 785],
-        tecnologos: [
-          { name: "RAMIREZ MONCADA KAREN PAOLA", total: 3914, atendidos: 3581, desertados: 331, pendientes: 2, vals: [239, 448, 671, 535, 376, 616, 313, 212, 271, 233] },
-          { name: "PERALTA GARAMENDI GANDHI ISABEL", total: 3786, atendidos: 3391, desertados: 395, pendientes: 0, vals: [474, 476, 140, 514, 275, 622, 648, 277, 268, 92] },
-          { name: "CALLIRGOS PAREDES LUIS ENRIQUE", total: 3462, atendidos: 3356, desertados: 97, pendientes: 9, vals: [375, 409, 669, 376, 450, 251, 188, 291, 269, 184] },
-          { name: "(EN BLANCO) / OTROS", total: 745, atendidos: 745, desertados: 0, pendientes: 0, vals: [49, 44, 121, 37, 128, 20, 33, 23, 14, 276] },
-          { name: "VIZCONDE SICHA BRAYAN VICTOR", total: 153, atendidos: 151, desertados: 0, pendientes: 2, vals: [0, 0, 0, 0, 153, 0, 0, 0, 0, 0] },
-          { name: "AGUILAR MAURICIO AGAPITO", total: 109, atendidos: 109, desertados: 0, pendientes: 0, vals: [0, 0, 0, 0, 109, 0, 0, 0, 0, 0] }
-        ]
-      },
-      "URGENCIAS / EMERGENCIA": {
-        total: 3393, atendidos: 3377, desertados: 16, pendientes: 0,
-        monthly: [384, 362, 389, 314, 276, 285, 272, 368, 377, 366],
-        tecnologos: [
-          { name: "RAMIREZ MONCADA KAREN PAOLA", total: 1262, atendidos: 1256, desertados: 6, pendientes: 0, vals: [112, 152, 213, 116, 92, 122, 92, 99, 107, 157] },
-          { name: "PERALTA GARAMENDI GANDHI ISABEL", total: 1067, atendidos: 1057, desertados: 10, pendientes: 0, vals: [157, 98, 30, 103, 63, 90, 117, 194, 114, 101] },
-          { name: "CALLIRGOS PAREDES LUIS ENRIQUE", total: 1028, atendidos: 1028, desertados: 0, pendientes: 0, vals: [108, 107, 143, 88, 116, 71, 62, 75, 152, 106] },
-          { name: "(EN BLANCO) / OTROS", total: 36, atendidos: 36, desertados: 0, pendientes: 0, vals: [7, 5, 3, 7, 5, 2, 1, 0, 4, 2] }
-        ]
-      },
-      "HOSPITALIZACION": {
-        total: 73, atendidos: 71, desertados: 2, pendientes: 0,
-        monthly: [10, 4, 4, 10, 5, 5, 4, 10, 8, 13],
-        tecnologos: [
-          { name: "PERALTA GARAMENDI GANDHI ISABEL", total: 32, atendidos: 30, desertados: 2, pendientes: 0, vals: [5, 2, 0, 3, 2, 3, 2, 7, 4, 4] },
-          { name: "RAMIREZ MONCADA KAREN PAOLA", total: 20, atendidos: 20, desertados: 0, pendientes: 0, vals: [4, 1, 3, 2, 1, 2, 0, 3, 0, 4] },
-          { name: "CALLIRGOS PAREDES LUIS ENRIQUE", total: 19, atendidos: 19, desertados: 0, pendientes: 0, vals: [1, 1, 0, 5, 1, 0, 2, 0, 4, 5] },
-          { name: "(EN BLANCO) / OTROS", total: 2, atendidos: 2, desertados: 0, pendientes: 0, vals: [0, 0, 1, 0, 1, 0, 0, 0, 0, 0] }
-        ]
-      },
-      "CENTRO QUIRURGICO": {
-        total: 2, atendidos: 2, desertados: 0, pendientes: 0,
-        monthly: [0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-        tecnologos: [
-          { name: "RAMIREZ MONCADA KAREN PAOLA", total: 1, atendidos: 1, desertados: 0, pendientes: 0, vals: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-          { name: "CALLIRGOS PAREDES LUIS ENRIQUE", total: 1, atendidos: 1, desertados: 0, pendientes: 0, vals: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] }
-        ]
-      },
-      "ALL": {
-        total: 15637, atendidos: 14783, desertados: 841, pendientes: 13,
-        monthly: [1531, 1743, 1994, 1787, 1772, 1799, 1458, 1181, 1207, 1165],
-        tecnologos: [
-          { name: "RAMIREZ MONCADA KAREN PAOLA", total: 5197, atendidos: 4858, desertados: 337, pendientes: 2, vals: [355, 601, 887, 654, 469, 740, 405, 314, 378, 394] },
-          { name: "PERALTA GARAMENDI GANDHI ISABEL", total: 4885, atendidos: 4478, desertados: 407, pendientes: 0, vals: [616, 576, 170, 620, 340, 715, 767, 478, 386, 197] },
-          { name: "CALLIRGOS PAREDES LUIS ENRIQUE", total: 4510, atendidos: 4404, desertados: 97, pendientes: 9, vals: [484, 517, 812, 469, 567, 322, 252, 366, 425, 296] },
-          { name: "(EN BLANCO) / OTROS", total: 783, atendidos: 783, desertados: 0, pendientes: 0, vals: [56, 49, 125, 44, 134, 22, 34, 23, 18, 278] },
-          { name: "VIZCONDE SICHA BRAYAN VICTOR", total: 153, atendidos: 151, desertados: 0, pendientes: 2, vals: [0, 0, 0, 0, 153, 0, 0, 0, 0, 0] },
-          { name: "AGUILAR MAURICIO AGAPITO", total: 109, atendidos: 109, desertados: 0, pendientes: 0, vals: [0, 0, 0, 0, 109, 0, 0, 0, 0, 0] }
-        ]
-      }
-    };
+    let TOMA_DB = {"CONSULTA EXTERNA":{"total":12169,"atendidos":11333,"desertados":823,"pendientes":13,"monthly":[1137,1377,1601,1462,1491,1509,1182,803,822,785],"tecnologos":[{"name":"RAMIREZ MONCADA KAREN PAOLA","total":3914,"atendidos":3581,"desertados":331,"pendientes":2,"vals":[239,448,671,535,376,616,313,212,271,233]},{"name":"PERALTA GARAMENDI GANDHI ISABEL","total":3786,"atendidos":3391,"desertados":395,"pendientes":0,"vals":[474,476,140,514,275,622,648,277,268,92]},{"name":"CALLIRGOS PAREDES LUIS ENRIQUE","total":3462,"atendidos":3356,"desertados":97,"pendientes":9,"vals":[375,409,669,376,450,251,188,291,269,184]},{"name":"(EN BLANCO) / OTROS","total":745,"atendidos":745,"desertados":0,"pendientes":0,"vals":[49,44,121,37,128,20,33,23,14,276]},{"name":"VIZCONDE SICHA BRAYAN VICTOR","total":153,"atendidos":151,"desertados":0,"pendientes":2,"vals":[0,0,0,0,153,0,0,0,0,0]},{"name":"AGUILAR MAURICIO AGAPITO","total":109,"atendidos":109,"desertados":0,"pendientes":0,"vals":[0,0,0,0,109,0,0,0,0,0]}]},"URGENCIAS / EMERGENCIA":{"total":3393,"atendidos":3377,"desertados":16,"pendientes":0,"monthly":[384,362,389,314,276,285,272,368,377,366],"tecnologos":[{"name":"RAMIREZ MONCADA KAREN PAOLA","total":1262,"atendidos":1256,"desertados":6,"pendientes":0,"vals":[112,152,213,116,92,122,92,99,107,157]},{"name":"PERALTA GARAMENDI GANDHI ISABEL","total":1067,"atendidos":1057,"desertados":10,"pendientes":0,"vals":[157,98,30,103,63,90,117,194,114,101]},{"name":"CALLIRGOS PAREDES LUIS ENRIQUE","total":1028,"atendidos":1028,"desertados":0,"pendientes":0,"vals":[108,107,143,88,116,71,62,75,152,106]},{"name":"(EN BLANCO) / OTROS","total":36,"atendidos":36,"desertados":0,"pendientes":0,"vals":[7,5,3,7,5,2,1,0,4,2]}]},"HOSPITALIZACION":{"total":73,"atendidos":71,"desertados":2,"pendientes":0,"monthly":[10,4,4,10,5,5,4,10,8,13],"tecnologos":[{"name":"PERALTA GARAMENDI GANDHI ISABEL","total":32,"atendidos":30,"desertados":2,"pendientes":0,"vals":[5,2,0,3,2,3,2,7,4,4]},{"name":"RAMIREZ MONCADA KAREN PAOLA","total":20,"atendidos":20,"desertados":0,"pendientes":0,"vals":[4,1,3,2,1,2,0,3,0,4]},{"name":"CALLIRGOS PAREDES LUIS ENRIQUE","total":19,"atendidos":19,"desertados":0,"pendientes":0,"vals":[1,1,0,5,1,0,2,0,4,5]},{"name":"(EN BLANCO) / OTROS","total":2,"atendidos":2,"desertados":0,"pendientes":0,"vals":[0,0,1,0,1,0,0,0,0,0]}]},"CENTRO QUIRURGICO":{"total":2,"atendidos":2,"desertados":0,"pendientes":0,"monthly":[0,0,0,1,0,0,0,0,0,1],"tecnologos":[{"name":"RAMIREZ MONCADA KAREN PAOLA","total":1,"atendidos":1,"desertados":0,"pendientes":0,"vals":[0,0,0,1,0,0,0,0,0,0]},{"name":"CALLIRGOS PAREDES LUIS ENRIQUE","total":1,"atendidos":1,"desertados":0,"pendientes":0,"vals":[0,0,0,0,0,0,0,0,0,1]}]},"ALL":{"total":15637,"atendidos":14783,"desertados":841,"pendientes":13,"monthly":[1531,1743,1994,1787,1772,1799,1458,1181,1207,1165],"tecnologos":[{"name":"RAMIREZ MONCADA KAREN PAOLA","total":5197,"atendidos":4858,"desertados":337,"pendientes":2,"vals":[355,601,887,654,469,740,405,314,378,394]},{"name":"PERALTA GARAMENDI GANDHI ISABEL","total":4885,"atendidos":4478,"desertados":407,"pendientes":0,"vals":[616,576,170,620,340,715,767,478,386,197]},{"name":"CALLIRGOS PAREDES LUIS ENRIQUE","total":4510,"atendidos":4404,"desertados":97,"pendientes":9,"vals":[484,517,812,469,567,322,252,366,425,296]},{"name":"(EN BLANCO) / OTROS","total":783,"atendidos":783,"desertados":0,"pendientes":0,"vals":[56,49,125,44,134,22,34,23,18,278]},{"name":"VIZCONDE SICHA BRAYAN VICTOR","total":153,"atendidos":151,"desertados":0,"pendientes":2,"vals":[0,0,0,0,153,0,0,0,0,0]},{"name":"AGUILAR MAURICIO AGAPITO","total":109,"atendidos":109,"desertados":0,"pendientes":0,"vals":[0,0,0,0,109,0,0,0,0,0]}]}};
 
     // 4. BASE EXACTA DE PROCEDIMIENTOS CLÍNICOS REALES POR ETAPA Y ÁREA
-    const PROCEDURES_DB = {
-      td1: {
-        "CONSULTA EXTERNA": [
-          { name: "ECOGRAFIA TRANSVAGINAL", total: 3051, vals: [283, 323, 299, 373, 354, 385, 195, 257, 312, 270] },
-          { name: "ECOGRAFIA ABDOMINAL COMPLETA", total: 2931, vals: [129, 183, 213, 253, 319, 406, 252, 315, 484, 377] },
-          { name: "MAMOGRAFIA DE TAMIZAJE BILATERAL", total: 2052, vals: [132, 138, 143, 251, 289, 242, 214, 191, 274, 178] },
-          { name: "ECOGRAFIA DE MAMAS BILATERAL", total: 1923, vals: [141, 117, 123, 205, 238, 298, 174, 178, 291, 158] },
-          { name: "RX DE TORAX; VISTA UNICA PA", total: 1586, vals: [138, 170, 159, 199, 238, 231, 195, 101, 82, 73] },
-          { name: "ECOGRAFIA SUPRAPUBICA PROSTATICA", total: 1580, vals: [120, 120, 90, 84, 185, 190, 206, 208, 210, 167] },
-          { name: "ECOGRAFÍA RENAL Y RETROPERITONEAL", total: 1274, vals: [88, 94, 64, 75, 118, 129, 151, 180, 210, 165] }
-        ],
-        "URGENCIAS / EMERGENCIA": [
-          { name: "RX DE TORAX; VISTA UNICA PA", total: 602, vals: [62, 58, 64, 52, 54, 56, 50, 68, 72, 66] },
-          { name: "EXAMEN RADIOLOGICO DE TOBILLO 3 VISTAS", total: 223, vals: [22, 20, 24, 21, 19, 18, 19, 25, 28, 27] },
-          { name: "PARRILLA COSTAL UNILATERAL 2 VISTAS", total: 216, vals: [20, 21, 22, 19, 20, 21, 18, 24, 26, 25] },
-          { name: "RX DE PIE DOS INCIDENCIAS", total: 195, vals: [18, 19, 21, 18, 16, 17, 16, 22, 24, 24] },
-          { name: "RX SIMPLE DE TOBILLO", total: 186, vals: [18, 17, 19, 16, 17, 16, 15, 21, 23, 24] },
-          { name: "ECOGRAFIA ABDOMINAL COMPLETA", total: 152, vals: [12, 14, 16, 18, 15, 17, 16, 14, 16, 14] },
-          { name: "ECOGRAFIA ABDOMINAL REGIONAL", total: 134, vals: [10, 12, 14, 15, 12, 14, 15, 12, 16, 14] }
-        ],
-        "HOSPITALIZACION": [
-          { name: "ECOGRAFIA ABDOMINAL COMPLETA", total: 23, vals: [1, 2, 0, 3, 2, 2, 1, 3, 3, 6] },
-          { name: "RX DE TORAX; VISTA UNICA PA", total: 18, vals: [3, 0, 2, 4, 3, 1, 1, 2, 1, 1] },
-          { name: "EXAMEN RADIOLOGICO DE TORAX PORTATIL", total: 16, vals: [0, 0, 1, 2, 0, 0, 4, 3, 2, 4] },
-          { name: "ECOGRAFIA DE PARTES BLANDAS", total: 14, vals: [2, 1, 0, 2, 1, 1, 2, 2, 1, 2] },
-          { name: "ECOGRAFIA RENAL", total: 12, vals: [1, 0, 1, 2, 2, 1, 1, 2, 1, 1] }
-        ],
-        "CENTRO QUIRURGICO": [
-          { name: "TORAX, DOS VISTAS (F/L) LORDOTICO APICAL", total: 1, vals: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-          { name: "EXAMEN RADIOLOGICO DE TORAX PORTATIL", total: 1, vals: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] },
-          { name: "RX SIMPLE DE HUMERO PROXIMAL/DISTAL", total: 1, vals: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1] },
-          { name: "ECOGRAFIA DE PARTES BLANDAS", total: 1, vals: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0] }
-        ],
-        "ALL": [
-          { name: "ECOGRAFIA ABDOMINAL COMPLETA", total: 3106, vals: [142, 199, 229, 274, 336, 425, 269, 332, 503, 397] },
-          { name: "ECOGRAFIA TRANSVAGINAL", total: 3059, vals: [284, 324, 300, 374, 354, 386, 195, 258, 313, 271] },
-          { name: "RX DE TORAX; VISTA UNICA PA", total: 2206, vals: [203, 228, 225, 255, 295, 288, 246, 171, 155, 140] },
-          { name: "MAMOGRAFIA DE TAMIZAJE BILATERAL", total: 2053, vals: [132, 138, 143, 251, 289, 242, 215, 191, 274, 178] },
-          { name: "ECOGRAFIA DE MAMAS BILATERAL", total: 1939, vals: [143, 118, 124, 207, 240, 301, 176, 180, 292, 158] }
-        ]
-      },
-      td3: {
-        "CONSULTA EXTERNA": [
-          { name: "MAMOGRAFIA DE TAMIZAJE BILATERAL", total: 2052, vals: [132, 138, 143, 251, 289, 242, 214, 191, 274, 178] },
-          { name: "ECOGRAFIA ABDOMINAL COMPLETA", total: 1723, vals: [73, 110, 138, 213, 170, 154, 124, 135, 287, 341] },
-          { name: "ECOGRAFIA TRANSVAGINAL", total: 1672, vals: [280, 311, 293, 328, 129, 142, 74, 46, 41, 43] },
-          { name: "ECOGRAFIA DE MAMAS BILATERAL", total: 1379, vals: [84, 66, 87, 182, 158, 202, 151, 138, 173, 143] },
-          { name: "ECOGRAFIA SUPRAPUBICA PROSTATICA", total: 1094, vals: [86, 75, 73, 74, 109, 107, 139, 151, 135, 152] },
-          { name: "ECOGRAFÍA RENAL Y RETROPERITONEAL", total: 851, vals: [58, 44, 52, 59, 56, 62, 105, 124, 145, 149] },
-          { name: "ECOGRAFIA DE PARTES BLANDAS", total: 455, vals: [14, 16, 27, 27, 61, 81, 58, 51, 60, 67] }
-        ],
-        "URGENCIAS / EMERGENCIA": [
-          { name: "ECOGRAFIA ABDOMINAL REGIONAL", total: 88, vals: [1, 14, 11, 9, 12, 5, 11, 9, 10, 6] },
-          { name: "ECOGRAFIA ABDOMINAL COMPLETA", total: 71, vals: [12, 4, 5, 6, 6, 8, 4, 7, 5, 14] },
-          { name: "TOMOGRAFIA AXIAL CEREBRAL S/C", total: 48, vals: [6, 2, 4, 8, 4, 11, 1, 1, 2, 9] },
-          { name: "RX DE TORAX; VISTA UNICA PA", total: 39, vals: [2, 8, 6, 1, 8, 2, 5, 3, 2, 2] },
-          { name: "ECOGRAFIA DE PARTES BLANDAS", total: 34, vals: [2, 3, 5, 1, 1, 4, 4, 5, 4, 5] }
-        ],
-        "HOSPITALIZACION": [
-          { name: "TOMOGRAFIA AXIAL CEREBRAL S/C", total: 9, vals: [0, 0, 0, 0, 2, 2, 2, 0, 1, 2] },
-          { name: "TC ABDOMEN Y PELVIS CON CONTRASTE", total: 6, vals: [0, 0, 0, 1, 1, 0, 0, 2, 0, 2] },
-          { name: "ECOGRAFIA TRANSVAGINAL", total: 5, vals: [0, 0, 0, 0, 0, 0, 1, 0, 3, 1] },
-          { name: "ECOGRAFIA ABDOMINAL SUPERIOR", total: 4, vals: [0, 2, 0, 0, 0, 0, 2, 0, 0, 0] }
-        ],
-        "CENTRO QUIRURGICO": [
-          { name: "EXAMEN RADIOLOGICO DE TORAX PORTATIL", total: 1, vals: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0] }
-        ],
-        "ALL": [
-          { name: "MAMOGRAFIA DE TAMIZAJE BILATERAL", total: 2053, vals: [132, 138, 143, 251, 289, 242, 215, 191, 274, 178] },
-          { name: "ECOGRAFIA ABDOMINAL COMPLETA", total: 1796, vals: [83, 110, 135, 219, 172, 162, 128, 140, 291, 356] },
-          { name: "ECOGRAFIA TRANSVAGINAL", total: 1678, vals: [277, 308, 292, 327, 127, 141, 73, 46, 43, 44] },
-          { name: "ECOGRAFIA DE MAMAS BILATERAL", total: 1388, vals: [86, 66, 89, 181, 160, 201, 152, 140, 172, 141] },
-          { name: "ECOGRAFIA SUPRAPUBICA PROSTATICA", total: 1108, vals: [84, 75, 73, 73, 109, 111, 139, 152, 138, 154] }
-        ]
-      }
-    };
+    let PROCEDURES_DB = {"td1":{"CONSULTA EXTERNA":[{"name":"ECOGRAFIA TRANSVAGINAL","total":3051,"vals":[283,323,299,373,354,385,195,257,312,270]},{"name":"ECOGRAFIA ABDOMINAL COMPLETA","total":2931,"vals":[129,183,213,253,319,406,252,315,484,377]},{"name":"MAMOGRAFIA DE TAMIZAJE BILATERAL","total":2052,"vals":[132,138,143,251,289,242,214,191,274,178]},{"name":"ECOGRAFIA DE MAMAS BILATERAL","total":1923,"vals":[141,117,123,205,238,298,174,178,291,158]},{"name":"RX DE TORAX; VISTA UNICA PA","total":1586,"vals":[138,170,159,199,238,231,195,101,82,73]},{"name":"ECOGRAFIA SUPRAPUBICA PROSTATICA","total":1580,"vals":[120,120,90,84,185,190,206,208,210,167]},{"name":"ECOGRAFÍA RENAL Y RETROPERITONEAL","total":1274,"vals":[88,94,64,75,118,129,151,180,210,165]}],"URGENCIAS / EMERGENCIA":[{"name":"RX DE TORAX; VISTA UNICA PA","total":602,"vals":[62,58,64,52,54,56,50,68,72,66]},{"name":"EXAMEN RADIOLOGICO DE TOBILLO 3 VISTAS","total":223,"vals":[22,20,24,21,19,18,19,25,28,27]},{"name":"PARRILLA COSTAL UNILATERAL 2 VISTAS","total":216,"vals":[20,21,22,19,20,21,18,24,26,25]},{"name":"RX DE PIE DOS INCIDENCIAS","total":195,"vals":[18,19,21,18,16,17,16,22,24,24]},{"name":"RX SIMPLE DE TOBILLO","total":186,"vals":[18,17,19,16,17,16,15,21,23,24]},{"name":"ECOGRAFIA ABDOMINAL COMPLETA","total":152,"vals":[12,14,16,18,15,17,16,14,16,14]},{"name":"ECOGRAFIA ABDOMINAL REGIONAL","total":134,"vals":[10,12,14,15,12,14,15,12,16,14]}],"HOSPITALIZACION":[{"name":"ECOGRAFIA ABDOMINAL COMPLETA","total":23,"vals":[1,2,0,3,2,2,1,3,3,6]},{"name":"RX DE TORAX; VISTA UNICA PA","total":18,"vals":[3,0,2,4,3,1,1,2,1,1]},{"name":"EXAMEN RADIOLOGICO DE TORAX PORTATIL","total":16,"vals":[0,0,1,2,0,0,4,3,2,4]},{"name":"ECOGRAFIA DE PARTES BLANDAS","total":14,"vals":[2,1,0,2,1,1,2,2,1,2]},{"name":"ECOGRAFIA RENAL","total":12,"vals":[1,0,1,2,2,1,1,2,1,1]}],"CENTRO QUIRURGICO":[{"name":"TORAX, DOS VISTAS (F/L) LORDOTICO APICAL","total":1,"vals":[0,0,0,1,0,0,0,0,0,0]},{"name":"EXAMEN RADIOLOGICO DE TORAX PORTATIL","total":1,"vals":[0,0,0,1,0,0,0,0,0,0]},{"name":"RX SIMPLE DE HUMERO PROXIMAL/DISTAL","total":1,"vals":[0,0,0,0,0,0,0,0,0,1]},{"name":"ECOGRAFIA DE PARTES BLANDAS","total":1,"vals":[1,0,0,0,0,0,0,0,0,0]}],"ALL":[{"name":"ECOGRAFIA ABDOMINAL COMPLETA","total":3106,"vals":[142,199,229,274,336,425,269,332,503,397]},{"name":"ECOGRAFIA TRANSVAGINAL","total":3059,"vals":[284,324,300,374,354,386,195,258,313,271]},{"name":"RX DE TORAX; VISTA UNICA PA","total":2206,"vals":[203,228,225,255,295,288,246,171,155,140]},{"name":"MAMOGRAFIA DE TAMIZAJE BILATERAL","total":2053,"vals":[132,138,143,251,289,242,215,191,274,178]},{"name":"ECOGRAFIA DE MAMAS BILATERAL","total":1939,"vals":[143,118,124,207,240,301,176,180,292,158]}]},"td3":{"CONSULTA EXTERNA":[{"name":"MAMOGRAFIA DE TAMIZAJE BILATERAL","total":2052,"vals":[132,138,143,251,289,242,214,191,274,178]},{"name":"ECOGRAFIA ABDOMINAL COMPLETA","total":1723,"vals":[73,110,138,213,170,154,124,135,287,341]},{"name":"ECOGRAFIA TRANSVAGINAL","total":1672,"vals":[280,311,293,328,129,142,74,46,41,43]},{"name":"ECOGRAFIA DE MAMAS BILATERAL","total":1379,"vals":[84,66,87,182,158,202,151,138,173,143]},{"name":"ECOGRAFIA SUPRAPUBICA PROSTATICA","total":1094,"vals":[86,75,73,74,109,107,139,151,135,152]},{"name":"ECOGRAFÍA RENAL Y RETROPERITONEAL","total":851,"vals":[58,44,52,59,56,62,105,124,145,149]},{"name":"ECOGRAFIA DE PARTES BLANDAS","total":455,"vals":[14,16,27,27,61,81,58,51,60,67]}],"URGENCIAS / EMERGENCIA":[{"name":"ECOGRAFIA ABDOMINAL REGIONAL","total":88,"vals":[1,14,11,9,12,5,11,9,10,6]},{"name":"ECOGRAFIA ABDOMINAL COMPLETA","total":71,"vals":[12,4,5,6,6,8,4,7,5,14]},{"name":"TOMOGRAFIA AXIAL CEREBRAL S/C","total":48,"vals":[6,2,4,8,4,11,1,1,2,9]},{"name":"RX DE TORAX; VISTA UNICA PA","total":39,"vals":[2,8,6,1,8,2,5,3,2,2]},{"name":"ECOGRAFIA DE PARTES BLANDAS","total":34,"vals":[2,3,5,1,1,4,4,5,4,5]}],"HOSPITALIZACION":[{"name":"TOMOGRAFIA AXIAL CEREBRAL S/C","total":9,"vals":[0,0,0,0,2,2,2,0,1,2]},{"name":"TC ABDOMEN Y PELVIS CON CONTRASTE","total":6,"vals":[0,0,0,1,1,0,0,2,0,2]},{"name":"ECOGRAFIA TRANSVAGINAL","total":5,"vals":[0,0,0,0,0,0,1,0,3,1]},{"name":"ECOGRAFIA ABDOMINAL SUPERIOR","total":4,"vals":[0,2,0,0,0,0,2,0,0,0]}],"CENTRO QUIRURGICO":[{"name":"EXAMEN RADIOLOGICO DE TORAX PORTATIL","total":1,"vals":[0,0,0,1,0,0,0,0,0,0]}],"ALL":[{"name":"MAMOGRAFIA DE TAMIZAJE BILATERAL","total":2053,"vals":[132,138,143,251,289,242,215,191,274,178]},{"name":"ECOGRAFIA ABDOMINAL COMPLETA","total":1796,"vals":[83,110,135,219,172,162,128,140,291,356]},{"name":"ECOGRAFIA TRANSVAGINAL","total":1678,"vals":[277,308,292,327,127,141,73,46,43,44]},{"name":"ECOGRAFIA DE MAMAS BILATERAL","total":1388,"vals":[86,66,89,181,160,201,152,140,172,141]},{"name":"ECOGRAFIA SUPRAPUBICA PROSTATICA","total":1108,"vals":[84,75,73,73,109,111,139,152,138,154]}]}};
 
     let activeTab = "consolidada";
 
@@ -859,7 +545,6 @@
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       event.currentTarget.classList.add("active");
 
-      // Mostrar filtro de IPRESS solo cuando estemos en la pestaña de IPRESS
       const ipFilter = document.getElementById("ipressFilter");
       if (tabId === "ipress") {
         ipFilter.style.display = "inline-block";
@@ -1067,7 +752,6 @@
         const list = (PROCEDURES_DB.td1[oVal] || PROCEDURES_DB.td1["ALL"]);
         renderRankingHorizontal(leftBox, list, mIdx, "#005696", "#00a0df");
         
-        // CORRECCIÓN CLAVE: La curva de tendencia ahora grafica el TOTAL GENERAL REAL mensual de TD1
         const monthlyTotalSeries = PIVOT_DB.td1.total[oVal] || PIVOT_DB.td1.total["ALL"];
         renderMonthlyTotalTrend(rightBox, monthlyTotalSeries, "#005696");
       }
@@ -1269,7 +953,6 @@
       box.innerHTML = svg;
     }
 
-    // CURVA DE TENDENCIA EXACTA: GRAFICA EL TOTAL MENSUAL REAL DE LA TABLA DINÁMICA
     function renderMonthlyTotalTrend(box, monthlySeries, strokeCol) {
       const W = 460, H = 220, padL = 40, padB = 30, padT = 25;
       const chartW = W - padL - 15, chartH = H - padB - padT;
@@ -1650,7 +1333,6 @@
       `;
     }
 
-    // TABLA EXACTA 1:1 DE "SOLICITUDES CITADAS POR IPRES" (CAPTURA 29)
     function getIpressHTML(month, origin, selectedIpress) {
       const mIdx = month === "ALL" ? -1 : parseInt(month);
       const cols = mIdx === -1 ? MONTHS : [MONTHS[mIdx]];
@@ -1668,7 +1350,6 @@
         let ipressTotal = 0;
         let ipressMonthly = new Array(cols.length).fill(0);
 
-        // Filtro por área asistencial
         const areasToProcess = origin === "ALL" ? Object.keys(ip.areas) : (ip.areas[origin] ? [origin] : []);
 
         areasToProcess.forEach(ak => {
@@ -1694,7 +1375,6 @@
           h += `<td class="num" style="font-weight:700;">${ipressTotal.toLocaleString()}</td></tr>`;
           grandTotalSum += ipressTotal;
 
-          // Sub-filas por Área
           areasToProcess.forEach(ak => {
             const ar = ip.areas[ak];
             let areaTot = 0;
@@ -1715,7 +1395,6 @@
             areaMonthly.forEach(v => h += `<td class="num">${v ? v.toLocaleString() : '-'}</td>`);
             h += `<td class="num" style="font-weight:700;">${areaTot.toLocaleString()}</td></tr>`;
 
-            // Sub-sub-filas por Modalidad
             ar.mods.forEach(mod => {
               h += `<tr class="sub-sub-item"><td>&nbsp;&nbsp;&nbsp;&nbsp;• ${mod.name}</td>`;
               if (mIdx === -1) {
@@ -1736,7 +1415,6 @@
       return h;
     }
 
-    // TABLA EXACTA 1:1 DE "TOMA DE RAYOS X"
     function getTomaHTML(month, origin) {
       const mIdx = month === "ALL" ? -1 : parseInt(month);
       const cols = mIdx === -1 ? MONTHS : [MONTHS[mIdx]];
@@ -1775,7 +1453,6 @@
       return h;
     }
 
-    // FUNCIÓN UNIVERSAL PARA TD1, TD2, TD3, TD4
     function getStageHTML(stageKey, area, month, origin) {
       const mIdx = month === "ALL" ? -1 : parseInt(month);
       const cols = mIdx === -1 ? MONTHS : [MONTHS[mIdx]];
@@ -1841,7 +1518,6 @@
       applyFilters();
     }
 
-    // LECTURA DINÁMICA DE ACTUALIZACIONES EXCEL (NOVIEMBRE / DICIEMBRE)
     function handleExcelUpload(e, fileNum) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1882,33 +1558,103 @@
       r.readAsArrayBuffer(file);
     }
 
-    function generateGitHubHTML() {
-      let cleanDoc = document.documentElement.cloneNode(true);
-      let modal = cleanDoc.querySelector("#uploadModal");
-      if (modal) modal.remove();
+    // ==================== CONTROL DE ACCESO Y GENERADOR GITHUB ====================
+    const USUARIOS_AUTORIZADOS_IMG = ["40661036", "17827846", "06275632", "41741857", "18213999", "46574828", "17814977", "42283343"];
+    const SESSION_KEY_IMG = 'essalud_img_albrecht_auth_v1';
+    const LOGIN_MODAL_B64_IMG = 'CiAgPCEtLSBQQU5UQUxMQSBERSBJTklDSU8gREUgU0VTScOTTiBFU1NBTFVEIElNQUdFTk9MT0fDjUEgLS0+CiAgPGRpdiBpZD0iYXV0aExvZ2luT3ZlcmxheSIgc3R5bGU9InBvc2l0aW9uOmZpeGVkOyBpbnNldDowOyBiYWNrZ3JvdW5kOmxpbmVhci1ncmFkaWVudCgxMzVkZWcsICMwMDFjMzMgMCUsICMwMDJiNDkgNjAlLCAjMDA0NTc4IDEwMCUpOyB6LWluZGV4Ojk5OTk5OyBkaXNwbGF5OmZsZXg7IGFsaWduLWl0ZW1zOmNlbnRlcjsganVzdGlmeS1jb250ZW50OmNlbnRlcjsgcGFkZGluZzoxNnB4OyI+CiAgICA8ZGl2IHN0eWxlPSJiYWNrZ3JvdW5kOiNmZmZmZmY7IGJvcmRlci1yYWRpdXM6MThweDsgYm94LXNoYWRvdzowIDIwcHggNTBweCByZ2JhKDAsMCwwLDAuNDUpOyBib3JkZXI6MnB4IHNvbGlkICMwMGEwZGY7IG1heC13aWR0aDo0MTBweDsgd2lkdGg6MTAwJTsgb3ZlcmZsb3c6aGlkZGVuOyI+CiAgICAgIDxkaXYgc3R5bGU9ImJhY2tncm91bmQ6bGluZWFyLWdyYWRpZW50KDEzNWRlZywgIzAwMjIzZCAwJSwgIzAwNTY5NiAxMDAlKTsgcGFkZGluZzoyNnB4IDI0cHg7IHRleHQtYWxpZ246Y2VudGVyOyBjb2xvcjojZmZmZmZmOyBib3JkZXItYm90dG9tOjNweCBzb2xpZCAjMDBhMGRmOyI+CiAgICAgICAgPGRpdiBzdHlsZT0id2lkdGg6NTZweDsgaGVpZ2h0OjU2cHg7IGJvcmRlci1yYWRpdXM6MTRweDsgYmFja2dyb3VuZDojZmZmZmZmOyBjb2xvcjojMDAyYjQ5OyBkaXNwbGF5OmZsZXg7IGFsaWduLWl0ZW1zOmNlbnRlcjsganVzdGlmeS1jb250ZW50OmNlbnRlcjsgbWFyZ2luOjAgYXV0byAxMnB4OyBmb250LXNpemU6MjhweDsgYm94LXNoYWRvdzowIDRweCAxMnB4IHJnYmEoMCwwLDAsMC4yKTsiPvCfj6U8L2Rpdj4KICAgICAgICA8aDIgc3R5bGU9ImZvbnQtc2l6ZToxOXB4OyBmb250LXdlaWdodDo5MDA7IGxldHRlci1zcGFjaW5nOjAuM3B4OyBtYXJnaW46MDsiPlNJU1RFTUEgREUgSU1BR0VOT0xPR8ONQTwvaDI+CiAgICAgICAgPHAgc3R5bGU9ImZvbnQtc2l6ZToxMnB4OyBjb2xvcjojYjlkOGViOyBtYXJnaW4tdG9wOjVweDsgZm9udC13ZWlnaHQ6NjAwOyI+RXNTYWx1ZCDigKIgSG9zcGl0YWwgSSBBbGJyZWNodCDigJQgTGEgTGliZXJ0YWQ8L3A+CiAgICAgIDwvZGl2PgogICAgICA8Zm9ybSBvbnN1Ym1pdD0idmFsaWRhckFjY2Vzb0ltYWdlbm9sb2dpYShldmVudCkiIHN0eWxlPSJwYWRkaW5nOjI0cHg7IGRpc3BsYXk6ZmxleDsgZmxleC1kaXJlY3Rpb246Y29sdW1uOyBnYXA6MTZweDsiPgogICAgICAgIDxkaXY+CiAgICAgICAgICA8bGFiZWwgc3R5bGU9ImRpc3BsYXk6YmxvY2s7IGZvbnQtc2l6ZToxMS41cHg7IGZvbnQtd2VpZ2h0OjgwMDsgY29sb3I6IzAwMmI0OTsgdGV4dC10cmFuc2Zvcm06dXBwZXJjYXNlOyBsZXR0ZXItc3BhY2luZzowLjVweDsgbWFyZ2luLWJvdHRvbTo2cHg7Ij5Vc3VhcmlvIChETkkpPC9sYWJlbD4KICAgICAgICAgIDxpbnB1dCB0eXBlPSJ0ZXh0IiBpZD0ibG9naW5EbmlJbnB1dCIgbWF4bGVuZ3RoPSI4IiByZXF1aXJlZCBwbGFjZWhvbGRlcj0iSW5ncmVzZSBzdSBETkkgKDggZMOtZ2l0b3MpIgogICAgICAgICAgICAgICAgIHN0eWxlPSJ3aWR0aDoxMDAlOyBwYWRkaW5nOjExcHggMTRweDsgYmFja2dyb3VuZDojZjRmOGZiOyBib3JkZXI6MS41cHggc29saWQgI2Q0ZTNlZTsgYm9yZGVyLXJhZGl1czoxMHB4OyBmb250LXNpemU6MTRweDsgZm9udC13ZWlnaHQ6NzAwOyBjb2xvcjojMGExZjMzOyBvdXRsaW5lOm5vbmU7Ij4KICAgICAgICA8L2Rpdj4KICAgICAgICA8ZGl2PgogICAgICAgICAgPGxhYmVsIHN0eWxlPSJkaXNwbGF5OmJsb2NrOyBmb250LXNpemU6MTEuNXB4OyBmb250LXdlaWdodDo4MDA7IGNvbG9yOiMwMDJiNDk7IHRleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTsgbGV0dGVyLXNwYWNpbmc6MC41cHg7IG1hcmdpbi1ib3R0b206NnB4OyI+Q29udHJhc2XDsWE8L2xhYmVsPgogICAgICAgICAgPGlucHV0IHR5cGU9InBhc3N3b3JkIiBpZD0ibG9naW5QYXNzSW5wdXQiIG1heGxlbmd0aD0iOCIgcmVxdWlyZWQgcGxhY2Vob2xkZXI9IkluZ3Jlc2Ugc3UgY29udHJhc2XDsWEiCiAgICAgICAgICAgICAgICAgc3R5bGU9IndpZHRoOjEwMCU7IHBhZGRpbmc6MTFweCAxNHB4OyBiYWNrZ3JvdW5kOiNmNGY4ZmI7IGJvcmRlcjoxLjVweCBzb2xpZCAjZDRlM2VlOyBib3JkZXItcmFkaXVzOjEwcHg7IGZvbnQtc2l6ZToxNHB4OyBmb250LXdlaWdodDo3MDA7IGNvbG9yOiMwYTFmMzM7IG91dGxpbmU6bm9uZTsiPgogICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgaWQ9ImxvZ2luRXJyb3JNc2ciIHN0eWxlPSJkaXNwbGF5Om5vbmU7IHBhZGRpbmc6MTBweDsgYm9yZGVyLXJhZGl1czo4cHg7IGJhY2tncm91bmQ6I2ZkZThlODsgYm9yZGVyOjFweCBzb2xpZCAjZjhiNGI0OyBjb2xvcjojY2YyMjJlOyBmb250LXNpemU6MTJweDsgZm9udC13ZWlnaHQ6NzAwOyB0ZXh0LWFsaWduOmNlbnRlcjsiPgogICAgICAgICAgVXN1YXJpbyBvIGNvbnRyYXNlw7FhIGluY29ycmVjdG9zLiBWZXJpZmlxdWUgc3UgRE5JLgogICAgICAgIDwvZGl2PgogICAgICAgIDxidXR0b24gdHlwZT0ic3VibWl0IiBzdHlsZT0id2lkdGg6MTAwJTsgcGFkZGluZzoxM3B4OyBiYWNrZ3JvdW5kOmxpbmVhci1ncmFkaWVudCgxMzVkZWcsICMwMDJiNDkgMCUsICMwMDU2OTYgMTAwJSk7IGNvbG9yOiNmZmZmZmY7IGJvcmRlcjpub25lOyBib3JkZXItcmFkaXVzOjEwcHg7IGZvbnQtc2l6ZToxNHB4OyBmb250LXdlaWdodDo4MDA7IGN1cnNvcjpwb2ludGVyOyBib3gtc2hhZG93OjAgNHB4IDEycHggcmdiYSgwLDg2LDE1MCwwLjMpOyI+CiAgICAgICAgICDwn5SSIEluZ3Jlc2FyIGFsIFNpc3RlbWEKICAgICAgICA8L2J1dHRvbj4KICAgICAgPC9mb3JtPgogICAgPC9kaXY+CiAgPC9kaXY+Cg==';
 
-      let headerBtns = cleanDoc.querySelector(".header-btns");
-      if (headerBtns) {
-        headerBtns.innerHTML = `
-          <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; background:rgba(255,255,255,0.15); color:#ffffff; padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.3);">
-            <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
-            <span>Producción GitHub Pages</span>
-          </div>
-          <button class="btn btn-outline" onclick="resetToOfficial()">↺ Restablecer</button>
-        `;
+    function verificarSesionImg() {
+      const ov = document.getElementById('authLoginOverlay');
+      if (!ov) return;
+      if (sessionStorage.getItem(SESSION_KEY_IMG) === 'OK') {
+        ov.remove();
       }
-
-      let htmlString = "<!DOCTYPE html>\n" + cleanDoc.outerHTML;
-      const blob = new Blob([htmlString], { type: "text/html;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "index.html";
-      link.click();
-
-      alert("¡Se ha generado y descargado tu archivo 'index.html'!\n\nEste archivo está 100% limpio y listo para subir directamente a tu repositorio de GitHub Pages.");
     }
 
-    window.onload = init;
+    function validarAccesoImagenologia(e) {
+      e.preventDefault();
+      const dni = (document.getElementById('loginDniInput').value || '').trim();
+      const pass = (document.getElementById('loginPassInput').value || '').trim();
+      const err = document.getElementById('loginErrorMsg');
+      if (USUARIOS_AUTORIZADOS_IMG.includes(dni) && dni === pass) {
+        sessionStorage.setItem(SESSION_KEY_IMG, 'OK');
+        const ov = document.getElementById('authLoginOverlay');
+        if (ov) ov.remove();
+      } else {
+        err.style.display = 'block';
+      }
+    }
+
+    function generateGitHubHTML() {
+      try {
+        let rawHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+        const parser = new DOMParser();
+        const cleanDoc = parser.parseFromString(rawHtml, "text/html");
+
+        let modal = cleanDoc.querySelector("#uploadModal");
+        if (modal) modal.remove();
+
+        let headerBtns = cleanDoc.querySelector(".header-btns");
+        if (headerBtns) {
+          headerBtns.innerHTML = `
+            <div style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; background:rgba(255,255,255,0.15); color:#ffffff; padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.3);">
+              <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
+              <span>Producción GitHub Pages</span>
+            </div>
+            <button class="btn btn-outline" onclick="resetToOfficial()">↺ Restablecer</button>
+            <button class="btn" style="background:#cf222e; color:#ffffff;" onclick="sessionStorage.removeItem('essalud_img_albrecht_auth_v1'); location.reload();">Cerrar Sesión</button>
+          `;
+        }
+
+        if (!cleanDoc.querySelector("#authLoginOverlay")) {
+          const decodedModal = decodeURIComponent(escape(atob(LOGIN_MODAL_B64_IMG)));
+          cleanDoc.body.insertAdjacentHTML("afterbegin", decodedModal);
+        }
+
+        let htmlString = "<!DOCTYPE html>\n" + cleanDoc.documentElement.outerHTML;
+
+        htmlString = htmlString.replace(
+          /let MONTHS = \[.*?\];/,
+          `let MONTHS = ${JSON.stringify(MONTHS)};`
+        );
+        htmlString = htmlString.replace(
+          /let PIVOT_DB = \{[\s\S]*?\n    \};/,
+          `let PIVOT_DB = ${JSON.stringify(PIVOT_DB)};`
+        );
+        htmlString = htmlString.replace(
+          /let IPRESS_DB = \{[\s\S]*?\n    \};/,
+          `let IPRESS_DB = ${JSON.stringify(IPRESS_DB)};`
+        );
+        htmlString = htmlString.replace(
+          /let TOMA_DB = \{[\s\S]*?\n    \};/,
+          `let TOMA_DB = ${JSON.stringify(TOMA_DB)};`
+        );
+        htmlString = htmlString.replace(
+          /let PROCEDURES_DB = \{[\s\S]*?\n    \};/,
+          `let PROCEDURES_DB = ${JSON.stringify(PROCEDURES_DB)};`
+        );
+
+        const blob = new Blob([htmlString], { type: "text/html;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "index.html";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+
+        alert("¡Archivo 'index.html' generado correctamente con acceso protegido por DNI!");
+      } catch (err) {
+        console.error(err);
+        alert("Error al generar index.html: " + err.message);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      verificarSesionImg();
+      init();
+    });
   </script>
+
 
 </body></html>
